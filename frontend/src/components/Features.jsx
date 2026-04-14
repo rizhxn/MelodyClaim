@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Download, Mic2, FileSearch } from 'lucide-react';
+import { Sparkles, Binary, Scale } from 'lucide-react';
 
 export default function Features() {
   const container = {
@@ -18,19 +18,19 @@ export default function Features() {
 
   const features = [
     {
-      icon: <FileSearch size={32} className="text-[#9d4edd]" />,
-      title: "Automata Scanning",
-      description: "Aho-Corasick trie structures rapidly scan your melody against thousands of references in O(N)."
+      icon: <Sparkles size={32} className="text-[#9d4edd]" />,
+      title: "Listens with Logic",
+      description: "Music today is judged by ears. MelodyClaim listens with logic. We strip away sound — leaving only structure."
     },
     {
-      icon: <Download size={32} className="text-[#ff6d00]" />,
-      title: "MIDI Export",
-      description: "Extract directly from your DAW. We compare purely the structural melodic core."
+      icon: <Binary size={32} className="text-[#ff6d00]" />,
+      title: "A New Language",
+      description: "Every melody becomes a sequence, a pattern, a language. What once needed opinion now has form."
     },
     {
-      icon: <Mic2 size={32} className="text-white/80" />,
-      title: "Voice-to-Melody",
-      description: "Hum your idea directly. We convert audio to symbolic MIDI via real-time pitch detection. (Coming Soon)"
+      icon: <Scale size={32} className="text-white/80" />,
+      title: "Unbiased Precision",
+      description: "MelodyClaim is different. Precise. Mathematical. Unbiased. A new way to understand musical similarity."
     }
   ];
 
@@ -39,10 +39,10 @@ export default function Features() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-            Powerful Pipeline
+            The Idea
           </h2>
           <p className="text-white/60 max-w-2xl mx-auto">
-            Our technology seamlessly parses, normalizes, and compares structures mathematically.
+            A melody that speaks in patterns
           </p>
         </div>
 
