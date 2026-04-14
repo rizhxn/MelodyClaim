@@ -85,7 +85,6 @@ export default function App() {
         {appState === STATE.UPLOAD && (
           <div className="relative">
             <Hero onFileAccepted={handleFileAccepted} error={error} />
-            <Divider />
             <Features />
           </div>
         )}
