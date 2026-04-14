@@ -8,8 +8,42 @@ const AnimatedNavLink = ({ href, children }) => {
   const hoverTextColor = 'text-white';
   const textSizeClass = 'text-sm';
 
+  const handleClick = (e) => {
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const targetId = href.substring(1);
+      const element = document.getElementById(targetId);
+      if (element) {
+        const startPosition = window.pageYOffset;
+        const targetPosition = element.getBoundingClientRect().top + startPosition;
+        const distance = targetPosition - startPosition;
+        const duration = 1200; // Slow, smooth duration (1.2 seconds)
+        let start = null;
+
+        const animateScroll = (timestamp) => {
+          if (!start) start = timestamp;
+          const progress = timestamp - start;
+          const percentage = Math.min(progress / duration, 1);
+          
+          // easeInOutSine curve for super smooth start and finish
+          const easing = percentage < 0.5 
+            ? 2 * percentage * percentage 
+            : 1 - Math.pow(-2 * percentage + 2, 2) / 2;
+
+          window.scrollTo(0, startPosition + distance * easing);
+
+          if (progress < duration) {
+            window.requestAnimationFrame(animateScroll);
+          }
+        };
+
+        window.requestAnimationFrame(animateScroll);
+      }
+    }
+  };
+
   return (
-    <a href={href} className={`group relative inline-block overflow-hidden h-5 flex items-center ${textSizeClass}`}>
+    <a href={href} onClick={handleClick} className={`group relative inline-block overflow-hidden h-5 flex items-center ${textSizeClass}`}>
       <div className="flex flex-col transition-transform duration-400 ease-out transform group-hover:-translate-y-1/2">
         <span className={defaultTextColor}>{children}</span>
         <span className={hoverTextColor}>{children}</span>
@@ -57,7 +91,7 @@ export function Navbar() {
   );
 
   const navLinksData = [
-    { label: 'Manifesto', href: '#1' },
+    { label: 'About', href: '#about' },
     { label: 'Careers', href: '#2' },
     { label: 'Discover', href: '#3' },
   ];

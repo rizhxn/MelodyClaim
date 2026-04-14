@@ -102,7 +102,8 @@ export function WebGLShader() {
 
     let animationId;
     const animate = () => {
-      uniforms.time.value += 0.015; // Slowed down the animation as requested
+      // Much slower shader lines movement
+      uniforms.time.value += 0.003; 
       renderer.render(scene, camera);
       animationId = requestAnimationFrame(animate);
     };
