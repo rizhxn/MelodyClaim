@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import ProcessingState from './components/ProcessingState';
 import VerdictCard from './components/VerdictCard';
 import PianoRoll from './components/PianoRoll';
@@ -6,8 +7,9 @@ import IntervalEvidence from './components/IntervalEvidence';
 import HowItWorks from './components/HowItWorks';
 import { Navbar } from './components/ui/mini-navbar';
 import Hero from './components/Hero';
-import Divider from './components/Divider';
 import Features from './components/Features';
+import MidiPage from './pages/MidiPage';
+import HummingPage from './pages/HummingPage';
 
 // App states
 const STATE = {
@@ -80,13 +82,19 @@ export default function App() {
     <div className="bg-[#0A0A0A] min-h-screen text-white font-sans overflow-x-hidden selection:bg-[#9d4edd]/30 flex flex-col">
       <Navbar />
 
-      <main className="relative flex-1">
-        {/* Upload State / Landing Page */}
+      <main className="relative flex-1 flex flex-col">
+        {/* Upload State / Landing Page with Routing */}
         {appState === STATE.UPLOAD && (
-          <div className="relative">
-            <Hero onFileAccepted={handleFileAccepted} error={error} />
-            <Features />
-          </div>
+          <Routes>
+            <Route path="/" element={
+              <div className="relative">
+                <Hero />
+                <Features />
+              </div>
+            } />
+            <Route path="/midi" element={<MidiPage onFileAccepted={handleFileAccepted} error={error} />} />
+            <Route path="/humming" element={<HummingPage />} />
+          </Routes>
         )}
 
         {/* Processing State */}
