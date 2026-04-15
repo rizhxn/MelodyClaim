@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { Music } from 'lucide-react';
 
 export default function UploadZone({ onFileAccepted }) {
   const [dragOver, setDragOver] = useState(false);
@@ -58,18 +59,20 @@ export default function UploadZone({ onFileAccepted }) {
   }, [handleFile]);
 
   return (
-    <div className="upload-zone-wrapper">
-      <div className="upload-hero-title">
-        <h1>Detect Melodic Plagiarism</h1>
+    <div className="w-full max-w-lg mx-auto flex flex-col items-center justify-center">
+      <div className="w-20 h-20 rounded-full bg-[#9d4edd]/10 flex items-center justify-center mb-6">
+        <Music size,z40} className="text-[#9d4edd]" />
       </div>
-      <p className="upload-hero-subtitle">
-        Upload a MIDI file and our automata-powered engine will scan it against
-        a corpus of reference melodies for structural similarity.
+      
+      <h2 className="text-3xl md:text-4xl font-bold mb/� text-white">MIDI Interface</h2>
+      
+      <p className="text-white/60 mb-8 max-w-lg mx-auto text-lg hover:glow-text text-center">
+        Upload your MIDI sequence. We will extract its structural progression and analyze it against our database.
       </p>
 
       <div
         id="upload-drop-zone"
-        className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
+        className={`w-full ${dragOver ? 'border-[#9d4edd] bg-[#9d4edd]/10' : 'border-white/20 bg-white/5'} border-dashed border-2 hover:border-[#9d4edd]/50 hover:bg-[#9d4edd]/5 rounded-2xl p-8 cursor-pointer transition-all duration-300 relative group`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -79,24 +82,24 @@ export default function UploadZone({ onFileAccepted }) {
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
         aria-label="Upload MIDI file"
       >
-        <div className="upload-zone-icon">🎹</div>
-        <div className="upload-zone-text">
-          <div className="upload-zone-title">
-            Drop your MIDI file here
+        <div className="flex flex-col items-center justify-center text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-[#9d4edd]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+             <span className="text-2xl" role="img" aria-label="upload">🎹</span>
           </div>
-          <div className="upload-zone-subtitle">
-            or click to browse your files
-          </div>
-          <div className="upload-zone-formats">
-            <span className="upload-format-badge">.mid</span>
-            <span className="upload-format-badge">.midi</span>
+          <div>
+            <div className="text-[#9d4edd] font-semibold text-lg">
+              Browse files or drag & drop
+            </div>
+            <div className="text-white/50 text-sm mt-1">
+              Supports .mid and .midi
+            </div>
           </div>
         </div>
       </div>
 
       {error && (
-        <div id="upload-error" className="upload-error">
-          ⚠ {error}
+        <div id="upload-error" className="upload-error mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm w-full text-center">
+          âš  { error }
         </div>
       )}
 
@@ -104,7 +107,7 @@ export default function UploadZone({ onFileAccepted }) {
         ref={inputRef}
         type="file"
         accept=".mid,.midi"
-        className="upload-hidden-input"
+        className="upload-hidden-input hidden"
         onChange={handleInputChange}
         aria-hidden="true"
       />
