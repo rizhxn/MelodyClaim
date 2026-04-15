@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileMusic, Mic } from 'lucide-react';
+import { Music, Mic } from 'lucide-react';
 import { WebGLShader } from './ui/web-gl-shader';
 import { Link } from 'react-router-dom';
 
@@ -35,12 +35,12 @@ export default function Hero() {
             {/* Midi Button */}
             <Link 
               to="/midi"
-              className="group relative glass-panel flex flex-col items-center justify-center p-6 sm:w-48 transition-all duration-300 hover:scale-[1.02]"
+              className="group relative glass-panel flex flex-col items-center justify-center p-6 w-full sm:w-48 transition-all duration-300 hover:scale-[1.02]"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-[#9d4edd]/20 to-[#ff6d00]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-              <FileMusic size={32} className="text-[#9d4edd] mb-3" />
-              <span className="text-lg font-semibold text-white group-hover:glow-text">Upload MIDI</span>
-              <span className="text-xs text-white/40 mt-1">or Drag & Drop</span>
+              <Music size={32} className="text-[#9d4edd] mb-3" />
+              <span className="text-lg font-semibold text-white group-hover:glow-text">Import</span>
+              <span className="text-xs text-white/40 mt-1">Feed Melody</span>
             </Link>
 
             {/* Humming Button */}

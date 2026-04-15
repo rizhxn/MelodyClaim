@@ -19,13 +19,8 @@ export default function MidiPage({ onFileAccepted, error }) {
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="glass-panel p-8 md:p-12 text-center"
+          className="glass-panel p-8 md:p-16 text-center flex flex-col items-center justify-center min-h-[400px] border-[#9d4edd]/20"
         >
-          <h2 className="text-3xl font-bold mb-6 text-white">Upload MIDI</h2>
-          <p className="text-white/60 mb-8 max-w-lg mx-auto">
-            Upload your MIDI sequence. We will extract its structural progression and analyze it against our database.
-          </p>
-          
           <UploadZone onFileAccepted={onFileAccepted} />
 
           {error && (
