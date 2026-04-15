@@ -28,11 +28,16 @@ export function generateVerdict(filteredMatches) {
     };
   }
 
-  const hasStructural = filteredMatches.some(m => m.severity === 'STRUCTURAL');
+  const hasStructural = filteredMatches.some(m => m.severity === 'STRUCTURAL' || m.score >= 12);
   const verdict = hasStructural ? 'STRUCTURAL_MATCH' : 'MINOR_OVERLAP';
 
   // The primary match is the one with the highest score
   const primaryMatch = filteredMatches[0];
+  
+  // Upgrade the UI severity flag if the multiplier pushed it to structural
+  if (primaryMatch && primaryMatch.score >= 12 && primaryMatch.severity === 'MINOR') {
+    primaryMatch.severity = 'STRUCTURAL';
+  }
 
   const summary = hasStructural
     ? `Structural melodic similarity detected with "${primaryMatch.songName}" by ${primaryMatch.artist}. ` +

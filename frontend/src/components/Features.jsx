@@ -35,7 +35,7 @@ export default function Features() {
   ];
 
   return (
-    <section className="relative py-24 pb-48 z-10 bg-gradient-to-b from-transparent to-[#0A0A0A]">
+    <section id="about" className="relative py-24 pb-48 z-10 bg-gradient-to-b from-transparent to-[#0A0A0A]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">

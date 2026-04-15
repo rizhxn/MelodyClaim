@@ -10,6 +10,8 @@ import Hero from './components/Hero';
 import Features from './components/Features';
 import MidiPage from './pages/MidiPage';
 import HummingPage from './pages/HummingPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 
 // App states
 const STATE = {
@@ -94,6 +96,8 @@ export default function App() {
             } />
             <Route path="/midi" element={<MidiPage onFileAccepted={handleFileAccepted} error={error} />} />
             <Route path="/humming" element={<HummingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
           </Routes>
         )}
 

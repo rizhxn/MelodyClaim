@@ -36,16 +36,7 @@ export async function analyseHandler(req, res) {
   try {
     // Step 1: Parse MIDI
     const fileBuffer = fs.readFileSync(filePath);
-    const { notes, trackName, trackIndex } = parseMidi(fileBuffer);
-
-    if (notes.length < 4) {
-      return res.status(400).json({
-        error: 'MIDI file contains too few notes for analysis (minimum 4 required).',
-      });
-    }
-
-    // Step 2: Encode intervals
-    const queryIntervals = encodeIntervals(notes);
+    const { tracks } = parseMidi(fileBuffer);
 
     // Step 3: Load corpus and build automaton
     const corpus = getCorpus();
@@ -59,17 +50,34 @@ export async function analyseHandler(req, res) {
     const patterns = corpus.map(c => c.intervals);
     const automaton = buildAutomaton(patterns);
 
-    // Step 4: Search
-    const rawMatches = search(automaton, queryIntervals);
+    // Step 4: Search all tracks and accumulate matches
+    let allRawMatches = [];
+    let queryIntervalCount = 0;
+    let queryNoteCount = 0;
+    
+    for (const track of tracks) {
+      const qIntervals = encodeIntervals(track.notes);
+      queryIntervalCount += qIntervals.length;
+      queryNoteCount += track.notes.length;
+      
+      const rawMatches = search(automaton, qIntervals);
+      
+      // Inject the track info into the raw match (if needed downstream)
+      rawMatches.forEach(m => m.trackIndex = track.trackIndex);
+      allRawMatches.push(...rawMatches);
+    }
 
     // Step 5: Filter
-    const filteredMatches = filterMatches(rawMatches, corpus);
+    const filteredMatches = filterMatches(allRawMatches, corpus);
 
     // Step 6: Verdict
     const result = generateVerdict(filteredMatches);
 
     const processingTime = Date.now() - startTime;
 
+    // Use primary match track info if available, else just summarize the tracks
+    const firstTrack = tracks[0] || {};
+    
     // Build response
     const response = {
       verdict: result.verdict,
@@ -77,10 +85,10 @@ export async function analyseHandler(req, res) {
       processingTimeMs: processingTime,
       query: {
         fileName: req.file.originalname,
-        trackName,
-        trackIndex,
-        noteCount: notes.length,
-        intervalCount: queryIntervals.length,
+        trackName: tracks.length + ' melodic tracks combined', // Generalized
+        trackIndex: 0,
+        noteCount: queryNoteCount,
+        intervalCount: queryIntervalCount,
       },
       primaryMatch: result.primaryMatch
         ? {
@@ -92,9 +100,9 @@ export async function analyseHandler(req, res) {
             referenceStart: result.primaryMatch.referenceStart,
             referenceEnd: result.primaryMatch.referenceEnd,
             matchLength: result.primaryMatch.matchLength,
-            queryNotes: notes,
+            queryNotes: [], // We don't save the single track anymore, or we can just send empty array
             referenceNotes: result.primaryMatch.referenceNotes,
-            queryIntervals: queryIntervals,
+            queryIntervals: [], // Optional
             referenceIntervals: result.primaryMatch.referenceIntervals,
             severity: result.primaryMatch.severity,
             score: result.primaryMatch.score,

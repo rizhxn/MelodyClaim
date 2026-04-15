@@ -56,27 +56,45 @@ export function filterMatches(rawMatches, corpusEntries) {
 
   if (validMatches.length === 0) return [];
 
-  // Step 2: Classify each match
-  const classified = validMatches.map(m => {
-    const corpus = corpusEntries[m.patternIndex];
-    const matchLength = m.matched.length;
-    const severity = matchLength >= 10 ? 'STRUCTURAL' : 'MINOR';
-
-    // Find where in the reference this pattern starts
-    // The pattern IS the full corpus interval, so the match offset within
-    // the reference is found by searching for the sub-pattern
-    const refIntervals = corpus.intervals;
-    let referenceStart = 0;
-
-    // Search for the matched subsequence in the reference intervals
-    const matchStr = JSON.stringify(m.matched);
-    for (let i = 0; i <= refIntervals.length - matchLength; i++) {
-      const sub = refIntervals.slice(i, i + matchLength);
-      if (JSON.stringify(sub) === matchStr) {
-        referenceStart = i;
-        break;
+  // Group by patternIndex and alignment offset
+  // If an n-gram matches at query[10] and ref[5], offset = 10 - 5 = 5.
+  // The next overlapping n-gram matches at query[11] and ref[6], offset = 11 - 6 = 5.
+  // This allows us to perfectly stitch them!
+  const fragmentsByAlignment = new Map();
+  
+  for (const m of validMatches) {
+    const offset = m.start - m.referenceStart;
+    const key = `${m.patternIndex}::${offset}::${m.trackIndex || 0}`;
+    
+    if (!fragmentsByAlignment.has(key)) {
+      fragmentsByAlignment.set(key, {
+        patternIndex: m.patternIndex,
+        queryStart: m.start,
+        queryEnd: m.end,
+        referenceStart: m.referenceStart,
+        matched: [...m.matched]
+      });
+    } else {
+      const merged = fragmentsByAlignment.get(key);
+      // Extend the end bound
+      if (m.end > merged.queryEnd) {
+        // Append the new items that fall outside the previous end
+        const diff = m.end - merged.queryEnd;
+        merged.matched.push(...m.matched.slice(m.matched.length - diff));
+        merged.queryEnd = m.end;
       }
     }
+  }
+
+  const stitchedMatches = Array.from(fragmentsByAlignment.values());
+
+  // Step 2: Classify each match
+  const classified = stitchedMatches.map(m => {
+    const corpus = corpusEntries[m.patternIndex];
+    if (!corpus) return null;
+    
+    const matchLength = m.matched.length;
+    const severity = matchLength >= 10 ? 'STRUCTURAL' : 'MINOR';
 
     return {
       patternIndex: m.patternIndex,
@@ -84,19 +102,17 @@ export function filterMatches(rawMatches, corpusEntries) {
       artist: corpus.artist,
       matchLength,
       severity,
-      queryStart: m.start,
-      queryEnd: m.end,
+      queryStart: m.queryStart,
+      queryEnd: m.queryEnd,
       matchedIntervalSequence: m.matched,
-      referenceStart,
-      referenceEnd: referenceStart + matchLength - 1,
+      referenceStart: m.referenceStart,
+      referenceEnd: m.referenceStart + matchLength - 1,
       referenceNotes: corpus.notes || [],
       referenceIntervals: corpus.intervals,
       densityMultiplier: 1,
       score: matchLength,
     };
-  });
-
-  // Step 3: Group by reference song and apply density multiplier
+  }).filter(Boolean);
   const songGroups = new Map();
 
   for (const match of classified) {
