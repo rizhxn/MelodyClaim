@@ -29,7 +29,7 @@ export function WebGLShader() {
 
     const uniforms = {
       resolution: { value: [window.innerWidth, window.innerHeight] },
-      time: { value: 0.0 },
+      time: { value: 5.0 },
       xScale: { value: 1.0 },
       yScale: { value: 0.5 },
       distortion: { value: 0.05 },
