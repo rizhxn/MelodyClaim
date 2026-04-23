@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import ProcessingState from './components/ProcessingState';
 import VerdictCard from './components/VerdictCard';
 import PianoRoll from './components/PianoRoll';
@@ -80,9 +80,23 @@ export default function App() {
     setError(null);
   }, []);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const hideNavbar = location.pathname === '/midi' || location.pathname === '/humming';
+
+  // Listen for redirected state from HummingPage's "Full Analysis" Dynamic Island button
+  useEffect(() => {
+    if (location.state && location.state.result && appState === STATE.UPLOAD) {
+      setResult(location.state.result);
+      setAppState(STATE.RESULTS);
+      // Clear the state so refreshing doesn't lock it
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, appState, navigate, location.pathname]);
+
   return (
     <div className="bg-[#0A0A0A] min-h-screen text-white font-sans overflow-x-hidden selection:bg-[#9d4edd]/30 flex flex-col">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
 
       <main className="relative flex-1 flex flex-col">
         {/* Upload State / Landing Page with Routing */}
