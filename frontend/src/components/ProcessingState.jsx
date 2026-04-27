@@ -1,140 +1,52 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { AutomatonProcessing } from './analysis/automaton-processing';
+import { WebGLShader } from './ui/web-gl-shader';
 
-const TERMINAL_LINES = [
-  { text: 'parsing MIDI file...', delay: 0 },
-  { text: 'identified primary melodic track', delay: 400 },
-  { text: 'extracting note sequence', delay: 800, highlight: 'note sequence' },
-  { text: 'encoding interval representation', delay: 1200 },
-  { text: 'building interval sequence', delay: 1500, highlight: 'interval sequence' },
-  { text: 'constructing Aho-Corasick automaton', delay: 1800 },
-  { text: 'loading corpus (6 reference songs)', delay: 2000 },
-  { text: 'running multi-pattern search...', delay: 2200, highlight: 'running automaton' },
-  { text: 'analysis complete ✓', delay: 2400, status: true },
+// Mock data matching the AutomatonStructure
+const mockAutomaton = {
+  states: [
+    { id: 0, isAccepting: false },
+    { id: 1, isAccepting: false },
+    { id: 2, isAccepting: true },
+    { id: 3, isAccepting: false },
+    { id: 4, isAccepting: true },
+  ],
+  transitions: [
+    { from: 0, to: 1, symbol: 2 },
+    { from: 1, to: 2, symbol: -1 },
+    { from: 0, to: 3, symbol: 4 },
+    { from: 3, to: 4, symbol: 0 },
+  ],
+  failureLinks: [
+    { from: 1, to: 0 },
+    { from: 2, to: 0 },
+    { from: 3, to: 0 },
+    { from: 4, to: 0 },
+  ]
+};
+
+const mockQueryIntervals = [2, -1, 4, 0, 7, -2];
+
+const mockExecutionTrace = [
+  { position: 0, symbol: 2, fromState: 0, toState: 1, usedFailure: false, matchFired: false, matches: [] },
+  { position: 1, symbol: -1, fromState: 1, toState: 2, usedFailure: false, matchFired: true, matches: ['Shape of You - Ed Sheeran'] },
+  { position: 2, symbol: 4, fromState: 2, toState: 3, usedFailure: true, matchFired: false, matches: [] },
+  { position: 3, symbol: 0, fromState: 3, toState: 4, usedFailure: false, matchFired: true, matches: ['Blinding Lights - The Weeknd'] },
+  { position: 4, symbol: 7, fromState: 4, toState: 0, usedFailure: true, matchFired: false, matches: [] },
+  { position: 5, symbol: -2, fromState: 0, toState: 0, usedFailure: true, matchFired: false, matches: [] },
 ];
 
-const STATES = ['q₀', 'q₁', 'q₂', 'q₃', 'q₄'];
-
 export default function ProcessingState() {
-  const [visibleLines, setVisibleLines] = useState(0);
-  const [activeState, setActiveState] = useState(-1);
-  const [progress, setProgress] = useState(0);
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-
-    // Terminal lines
-    const lineTimers = TERMINAL_LINES.map((line, i) =>
-      setTimeout(() => {
-        if (mountedRef.current) setVisibleLines(i + 1);
-      }, line.delay)
-    );
-
-    // State machine progression
-    const stateTimers = STATES.map((_, i) =>
-      setTimeout(() => {
-        if (mountedRef.current) setActiveState(i);
-      }, i * 500 + 200)
-    );
-
-    // Progress bar
-    const progressInterval = setInterval(() => {
-      if (mountedRef.current) {
-        setProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(progressInterval);
-            return 100;
-          }
-          return prev + 2;
-        });
-      }
-    }, 50);
-
-    return () => {
-      mountedRef.current = false;
-      lineTimers.forEach(clearTimeout);
-      stateTimers.forEach(clearTimeout);
-      clearInterval(progressInterval);
-    };
-  }, []);
-
   return (
-    <div className="processing-wrapper">
-      <div className="processing-title">
-        <h2>Analyzing Your Melody</h2>
-        <p>Running through the plagiarism detection pipeline</p>
-      </div>
-
-      <div className="processing-content">
-        {/* Terminal Panel */}
-        <div className="processing-terminal">
-          <div className="terminal-header">
-            <div className="terminal-dot red" />
-            <div className="terminal-dot yellow" />
-            <div className="terminal-dot green" />
-            <span className="terminal-title">melodyclaim — analysis</span>
-          </div>
-          <div className="terminal-body">
-            {TERMINAL_LINES.slice(0, visibleLines).map((line, i) => (
-              <div
-                key={i}
-                className="terminal-line"
-                style={{ animationDelay: `${i * 50}ms` }}
-              >
-                <span className="prompt">›</span>
-                <span className="content">
-                  {line.status ? (
-                    <span className="status">{line.text}</span>
-                  ) : line.highlight ? (
-                    <>
-                      {line.text.split(line.highlight)[0]}
-                      <span className="highlight">{line.highlight}</span>
-                      {line.text.split(line.highlight)[1] || ''}
-                    </>
-                  ) : (
-                    line.text
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Automaton Panel */}
-        <div className="processing-automaton">
-          <div className="automaton-label">Finite Automaton State</div>
-
-          <div className="automaton-states">
-            {STATES.map((state, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div
-                  className={`automaton-state ${
-                    i < activeState ? 'completed' : i === activeState ? 'active' : ''
-                  }`}
-                >
-                  {state}
-                </div>
-                {i < STATES.length - 1 && (
-                  <span className={`automaton-arrow ${i <= activeState ? 'active' : ''}`}>
-                    →
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="automaton-progress">
-            <div className="progress-bar-track">
-              <div
-                className="progress-bar-fill"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <div className="progress-label">
-              {progress < 100 ? `Processing... ${progress}%` : 'Complete'}
-            </div>
-          </div>
-        </div>
+    <div className="w-full relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] overflow-hidden">
+      <WebGLShader />
+      <div className="relative z-10 w-full">
+        <AutomatonProcessing 
+          executionTrace={mockExecutionTrace}
+          queryIntervals={mockQueryIntervals}
+          automaton={mockAutomaton}
+          onComplete={() => {}}
+        />
       </div>
     </div>
   );

@@ -21,15 +21,15 @@ export function WebGLShader() {
     
     // Use local variables to avoid React StrictMode ref sharing bugs
     const scene = new THREE.Scene();
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ canvas });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setClearColor(0x000000, 0);
+    renderer.setClearColor(new THREE.Color(0x000000));
 
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, -1);
 
     const uniforms = {
       resolution: { value: [window.innerWidth, window.innerHeight] },
-      time: { value: 5.0 },
+      time: { value: 0.0 },
       xScale: { value: 1.0 },
       yScale: { value: 0.5 },
       distortion: { value: 0.05 },
@@ -102,7 +102,7 @@ export function WebGLShader() {
 
     let animationId;
     const animate = () => {
-      // Much slower shader lines movement
+      // Shader lines movement
       uniforms.time.value += 0.003; 
       renderer.render(scene, camera);
       animationId = requestAnimationFrame(animate);
