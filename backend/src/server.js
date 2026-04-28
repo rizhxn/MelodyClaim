@@ -1,9 +1,12 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRoutes from './routes/api.js';
+import authRoutes from './routes/authRoutes.js';
 import { seedDatabase } from './database/seed.js';
+import passport from './config/passport.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,6 +17,7 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
 
 // Ensure uploads directory exists
 import fs from 'fs';
@@ -31,6 +35,7 @@ if (!fs.existsSync(dbPath)) {
 
 // API routes
 app.use('/api', apiRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

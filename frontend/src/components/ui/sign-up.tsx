@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle, useMemo, useCallback, createContext, Children } from "react";
-// Importing class-variance-authority for the built-in button component
+import { useSearchParams } from "react-router-dom";
 import { cva, type VariantProps } from "class-variance-authority";
 // Importing icons from lucide-react
 import { ArrowRight, Mail, Gem, Lock, Eye, EyeOff, ArrowLeft, X, AlertCircle, PartyPopper, Loader } from "lucide-react";
@@ -12,6 +12,7 @@ import type { ReactNode } from "react"
 import type { GlobalOptions as ConfettiGlobalOptions, CreateTypes as ConfettiInstance, Options as ConfettiOptions } from "canvas-confetti"
 import confetti from "canvas-confetti"
 import { WebGLShader } from "./web-gl-shader"
+import { useAuth } from "../../contexts/AuthContext.jsx"
 
 type Api = { fire: (options?: ConfettiOptions) => void }
 export type ConfettiRef = Api | null
@@ -146,6 +147,19 @@ export const AuthComponent = ({ logo = <DefaultLogo />, brandName = "MelodyClaim
   const [modalErrorMessage, setModalErrorMessage] = useState('');
   const confettiRef = useRef<ConfettiRef>(null);
 
+  const { login, signup, loginWithGoogle, loginWithGitHub } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam) {
+      setModalErrorMessage(errorParam.replace(/_/g, ' '));
+      setModalStatus('error');
+      // Clean up the URL
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
+
   const isEmailValid = /\S+@\S+\.\S+/.test(email);
   const isPasswordValid = password.length >= 6;
   const isConfirmPasswordValid = confirmPassword.length >= 6;
@@ -177,17 +191,10 @@ export const AuthComponent = ({ logo = <DefaultLogo />, brandName = "MelodyClaim
         setModalStatus('loading');
         
         try {
-            const endpoint = isSignUp ? '/api/signup' : '/api/login';
-            const response = await fetch(`http://localhost:3001${endpoint}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(isSignUp ? { name: email.split('@')[0], email, password } : { email, password })
-            });
-
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.error || 'Authentication failed');
+            if (isSignUp) {
+                await signup(email, password, email.split('@')[0]);
+            } else {
+                await login(email, password);
             }
 
             const loadingStepsCount = modalSteps.length - 1;
@@ -307,8 +314,8 @@ useEffect(() => {
                         <BlurFade delay={0.25 * 1} className="w-full"><div className="text-center"><h1 className="mb-3 text-white text-center text-4xl sm:text-5xl md:text-5xl font-extrabold tracking-tighter leading-tight relative z-20 whitespace-nowrap">{isSignUp ? 'Get started with Us' : 'Welcome Back'}</h1></div></BlurFade>
                         <BlurFade delay={0.25 * 2}><p className="text-sm font-medium text-white/70 relative z-20">Continue with</p></BlurFade>
                         <BlurFade delay={0.25 * 3}><div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full text-white relative z-20">
-                            <GlassButton contentClassName="flex items-center justify-center gap-2 text-white" size="sm"><GoogleIcon /><span className="font-semibold text-white">Google</span></GlassButton>
-                            <GlassButton contentClassName="flex items-center justify-center gap-2 text-white" size="sm"><GitHubIcon /><span className="font-semibold text-white">GitHub</span></GlassButton>
+                            <GlassButton type="button" onClick={loginWithGoogle} contentClassName="flex items-center justify-center gap-2 text-white" size="sm"><GoogleIcon /><span className="font-semibold text-white">Google</span></GlassButton>
+                            <GlassButton type="button" onClick={loginWithGitHub} contentClassName="flex items-center justify-center gap-2 text-white" size="sm"><GitHubIcon /><span className="font-semibold text-white">GitHub</span></GlassButton>
                         </div></BlurFade>
                         <BlurFade delay={0.25 * 4} className="w-full max-w-[300px] mx-auto"><div className="flex items-center w-full gap-2 py-4 relative z-20"><hr className="w-full border-white/20"/><span className="text-xs font-semibold text-white/50">OR</span><hr className="w-full border-white/20"/></div></BlurFade>
                     </motion.div>}

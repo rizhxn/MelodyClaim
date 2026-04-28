@@ -12,6 +12,7 @@ import MidiPage from './pages/MidiPage';
 import HummingPage from './pages/HummingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import { AuthCallback } from './pages/AuthCallback.jsx';
 
 // App states
 const STATE = {
@@ -112,6 +113,7 @@ export default function App() {
             <Route path="/humming" element={<HummingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
           </Routes>
         )}
 
@@ -174,13 +176,13 @@ export default function App() {
       </main>
 
       {/* Custom Transparent Footer */}
-      <footer className="w-full relative z-10 text-white/50 bg-transparent mb-8">
-        <div className="max-w-7xl mx-auto px-6 pt-16 pb-8 flex flex-col items-center">
+      <footer className="w-full relative z-10 text-white/50 bg-transparent">
+        <div className="max-w-7xl mx-auto px-6 pb-8 flex flex-col items-center">
+            <div className="w-full border-t border-white/10 mb-8"></div>
             <p className="text-center max-w-xl text-sm font-normal leading-relaxed text-white/70 mb-8">
                 Empowering creators worldwide with the most advanced AI music plagiarism detection tools. Transform your ideas into reality without fear of copyright strikes.
             </p>
-            <div className="w-full border-t border-white/20"></div>
-            <div className="w-full flex flex-col md:flex-row items-center justify-between pt-8 gap-4">
+            <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
                 <p className="text-sm font-normal">Copyright © 2026 <a href="#" className="text-white hover:text-[#9d4edd] transition-colors">MelodyClaim</a>. All rights reserved.</p>
                 <div className="flex items-center gap-6 text-sm">
                     <a href="#" className="font-medium text-white/70 hover:text-white transition-all">
