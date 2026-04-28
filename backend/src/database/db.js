@@ -13,23 +13,19 @@ const DB_PATH = path.join(__dirname, '..', '..', 'melodyclaim.db');
 const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 
-// auth.md specifies to ensure the missing OAuth columns are added.
-try {
-  db.exec(`
-    ALTER TABLE users ADD COLUMN google_id TEXT UNIQUE;
-  `);
-} catch (e) {}
-
-try {
-  db.exec(`
-    ALTER TABLE users ADD COLUMN github_id TEXT UNIQUE;
-  `);
-} catch (e) {}
-
-try {
-  db.exec(`
-    ALTER TABLE users ADD COLUMN avatar_url TEXT;
-  `);
-} catch (e) {}
+// Create users table if it doesn't exist
+db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    display_name TEXT,
+    role TEXT DEFAULT 'user',
+    google_id TEXT UNIQUE,
+    github_id TEXT UNIQUE,
+    avatar_url TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+`);
 
 export default db;

@@ -136,7 +136,7 @@ router.get('/me', requireAuth, (req, res) => {
 // Google OAuth
 router.get('/google', (req, res, next) => {
   const cid = process.env.GOOGLE_CLIENT_ID;
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   if (!cid || cid === 'your_google_client_id_here' || cid === 'dummy_id') {
     return res.redirect(`${frontendUrl}/login?error=Google_OAuth_Client_ID_Missing_In_.env`);
   }
@@ -147,21 +147,21 @@ router.get('/google', (req, res, next) => {
 }));
 
 router.get('/google/callback', 
-  passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5174'}/login?error=oauth_failed` }),
+  passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=oauth_failed` }),
   (req, res) => {
     const token = jwt.sign(
       { id: req.user.id, email: req.user.email, role: req.user.role },
       process.env.JWT_SECRET || 'melodyclaim_jwt_secret_change_in_production',
       { expiresIn: '7d' }
     );
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5174'}/auth/callback?token=${token}`);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?token=${token}`);
   }
 );
 
 // GitHub OAuth
 router.get('/github', (req, res, next) => {
   const cid = process.env.GITHUB_CLIENT_ID;
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   if (!cid || cid === 'your_github_client_id_here' || cid === 'dummy_id') {
     return res.redirect(`${frontendUrl}/login?error=GitHub_OAuth_Client_ID_Missing_In_.env`);
   }
@@ -172,14 +172,14 @@ router.get('/github', (req, res, next) => {
 }));
 
 router.get('/github/callback',
-  passport.authenticate('github', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5174'}/login?error=oauth_failed` }),
+  passport.authenticate('github', { session: false, failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=oauth_failed` }),
   (req, res) => {
     const token = jwt.sign(
       { id: req.user.id, email: req.user.email, role: req.user.role },
       process.env.JWT_SECRET || 'melodyclaim_jwt_secret_change_in_production',
       { expiresIn: '7d' }
     );
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5174'}/auth/callback?token=${token}`);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?token=${token}`);
   }
 );
 

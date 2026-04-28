@@ -49,7 +49,7 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ error: 'File too large. Maximum size is 10MB.' });
   }
 
-  res.status(500).json({ error: 'Internal server error' });
+  res.status(500).json({ error: err.message || 'Internal server error', stack: err.stack });
 });
 
 app.listen(PORT, () => {
