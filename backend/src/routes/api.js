@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { analyseHandler } from '../controllers/analysisController.js';
+import { signupHandler, loginHandler } from '../controllers/authController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,6 +47,12 @@ const upload = multer({
 
 // POST /api/analyse
 router.post('/analyse', upload.single('midi'), analyseHandler);
+
+// POST /api/signup
+router.post('/signup', signupHandler);
+
+// POST /api/login
+router.post('/login', loginHandler);
 
 // GET /api/health
 router.get('/health', (req, res) => {

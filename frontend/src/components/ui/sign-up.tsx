@@ -163,7 +163,7 @@ export const AuthComponent = ({ logo = <DefaultLogo />, brandName = "MelodyClaim
     }
   };
 
-  const handleFinalSubmit = (e: React.FormEvent) => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (modalStatus !== 'closed') return;
     
@@ -175,15 +175,37 @@ export const AuthComponent = ({ logo = <DefaultLogo />, brandName = "MelodyClaim
         setModalStatus('error');
     } else {
         setModalStatus('loading');
-        const loadingStepsCount = modalSteps.length - 1;
-        const totalDuration = loadingStepsCount * TEXT_LOOP_INTERVAL * 1000;
-        setTimeout(() => {
-            fireSideCanons();
-            setModalStatus('success');
+        
+        try {
+            const endpoint = isSignUp ? '/api/signup' : '/api/login';
+            const response = await fetch(`http://localhost:3001${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(isSignUp ? { name: email.split('@')[0], email, password } : { email, password })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Authentication failed');
+            }
+
+            const loadingStepsCount = modalSteps.length - 1;
+            const totalDuration = loadingStepsCount * TEXT_LOOP_INTERVAL * 1000;
+            
+            // Wait for fake loading animation for visual effect
             setTimeout(() => {
-                window.location.href = '/';
-            }, 1500)
-        }, totalDuration);
+                fireSideCanons();
+                setModalStatus('success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500)
+            }, totalDuration);
+            
+        } catch (err) {
+            setModalErrorMessage(err instanceof Error ? err.message : 'Something went wrong');
+            setModalStatus('error');
+        }
     }
   };
 
@@ -266,7 +288,7 @@ useEffect(() => {
   );
 
   return (
-    <div className="bg-background min-h-screen w-screen flex flex-col pt-16 sm:pt-0 pb-16 sm:pb-0">
+    <div className="w-full flex w-full flex-col pt-4 sm:pt-0 pb-4 sm:pb-0 items-center justify-center">
         <style>{`
             input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none !important; } input[type="password"]::-webkit-credentials-auto-fill-button, input[type="password"]::-webkit-strong-password-auto-fill-button { display: none !important; } input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px transparent inset !important; -webkit-text-fill-color: var(--foreground) !important; background-color: transparent !important; background-clip: content-box !important; transition: background-color 5000s ease-in-out 0s !important; color: white !important; caret-color: white !important; } input:autofill { background-color: transparent !important; background-clip: content-box !important; -webkit-text-fill-color: white !important; color: white !important; } input:-internal-autofill-selected { background-color: transparent !important; background-image: none !important; color: white !important; -webkit-text-fill-color: white !important; } input:-webkit-autofill::first-line { color: white !important; -webkit-text-fill-color: white !important; }
             @property --angle-1 { syntax: "<angle>"; inherits: false; initial-value: -75deg; } @property --angle-2 { syntax: "<angle>"; inherits: false; initial-value: -45deg; }
@@ -275,29 +297,28 @@ useEffect(() => {
             .glass-input-wrap { position: relative; z-index: 2; transform-style: preserve-3d; border-radius: 9999px; } .glass-input { display: flex; position: relative; width: 100%; align-items: center; gap: 0.5rem; border-radius: 9999px; padding: 0.25rem; -webkit-tap-highlight-color: transparent; backdrop-filter: blur(clamp(1px, 0.125em, 4px)); transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1); background: linear-gradient(-75deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1), rgba(255,255,255,0.05)); box-shadow: inset 0 0.125em 0.125em rgba(255,255,255,0.1), inset 0 -0.125em 0.125em rgba(0,0,0,0.5), 0 0.25em 0.125em -0.125em rgba(0,0,0,0.2), 0 0 0.1em 0.25em inset rgba(0,0,0,0.2), 0 0 0 0 rgba(0,0,0,0.5); } .glass-input-wrap:focus-within .glass-input { backdrop-filter: blur(2px); border: 1px solid rgba(255,255,255,0.3); } .glass-input::after { content: ""; position: absolute; z-index: 1; inset: 0; border-radius: 9999px; width: calc(100% + clamp(1px, 0.0625em, 4px)); height: calc(100% + clamp(1px, 0.0625em, 4px)); top: calc(0% - clamp(1px, 0.0625em, 4px) / 2); left: calc(0% - clamp(1px, 0.0625em, 4px) / 2); padding: clamp(1px, 0.0625em, 4px); box-sizing: border-box; background: conic-gradient(from var(--angle-1) at 50% 50%, rgba(255,255,255,0.5) 0%, transparent 5% 40%, rgba(255,255,255,0.5) 50%, transparent 60% 95%, rgba(255,255,255,0.5) 100%), linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1)); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1), --angle-1 500ms ease; box-shadow: inset 0 0 0 calc(clamp(1px, 0.0625em, 4px) / 2) rgba(255,255,255,0.1); pointer-events: none; } .glass-input-wrap:focus-within .glass-input::after { --angle-1: -125deg; border-color: rgba(255,255,255,0.3); } .glass-input-text-area { position: absolute; inset: 0; border-radius: 9999px; pointer-events: none; } .glass-input-text-area::after { content: ""; display: block; position: absolute; width: calc(100% - clamp(1px, 0.0625em, 4px)); height: calc(100% - clamp(1px, 0.0625em, 4px)); top: calc(0% + clamp(1px, 0.0625em, 4px) / 2); left: calc(0% + clamp(1px, 0.0625em, 4px) / 2); box-sizing: border-box; border-radius: 9999px; overflow: clip; background: linear-gradient(var(--angle-2), transparent 0%, rgba(255,255,255,0.1) 40% 50%, transparent 55%); z-index: 3; mix-blend-mode: screen; pointer-events: none; background-size: 200% 200%; background-position: 0% 50%; transition: background-position calc(400ms * 1.25) cubic-bezier(0.25, 1, 0.5, 1), --angle-2 calc(400ms * 1.25) cubic-bezier(0.25, 1, 0.5, 1); } .glass-input-wrap:focus-within .glass-input-text-area::after { background-position: 25% 50%; }
         `}</style>
         
-        <WebGLShader />
         <Confetti ref={confettiRef} manualstart className="fixed top-0 left-0 w-full h-full pointer-events-none z-[999]" />
         <Modal />
 
-        <div className={cn("flex w-full flex-1 h-[80vh] items-center justify-center", "relative")}>
-            <fieldset disabled={modalStatus !== 'closed'} className="relative z-10 flex flex-col items-center gap-8 w-[280px] mx-auto p-4 text-white">
+        <div className={cn("flex w-full items-center justify-center p-4", "relative")}>
+            <fieldset disabled={modalStatus !== 'closed'} className="relative z-10 flex flex-col items-center gap-8 w-full max-w-sm mx-auto text-white">
                 <AnimatePresence mode="wait">
                     {authStep === "email" && <motion.div key="email-content" initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: "easeOut" }} className="w-full flex flex-col items-center gap-4">
-                        <BlurFade delay={0.25 * 1} className="w-full"><div className="text-center"><p className="font-serif font-light text-4xl sm:text-5xl md:text-6xl tracking-tight text-white whitespace-nowrap">{isSignUp ? 'Get started with Us' : 'Welcome Back'}</p></div></BlurFade>
-                        <BlurFade delay={0.25 * 2}><p className="text-sm font-medium text-white/70">Continue with</p></BlurFade>
-                        <BlurFade delay={0.25 * 3}><div className="flex items-center justify-center gap-4 w-full text-white">
+                        <BlurFade delay={0.25 * 1} className="w-full"><div className="text-center"><h1 className="mb-3 text-white text-center text-4xl sm:text-5xl md:text-5xl font-extrabold tracking-tighter leading-tight relative z-20 whitespace-nowrap">{isSignUp ? 'Get started with Us' : 'Welcome Back'}</h1></div></BlurFade>
+                        <BlurFade delay={0.25 * 2}><p className="text-sm font-medium text-white/70 relative z-20">Continue with</p></BlurFade>
+                        <BlurFade delay={0.25 * 3}><div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full text-white relative z-20">
                             <GlassButton contentClassName="flex items-center justify-center gap-2 text-white" size="sm"><GoogleIcon /><span className="font-semibold text-white">Google</span></GlassButton>
                             <GlassButton contentClassName="flex items-center justify-center gap-2 text-white" size="sm"><GitHubIcon /><span className="font-semibold text-white">GitHub</span></GlassButton>
                         </div></BlurFade>
-                        <BlurFade delay={0.25 * 4} className="w-[300px]"><div className="flex items-center w-full gap-2 py-2"><hr className="w-full border-white/20"/><span className="text-xs font-semibold text-white/50">OR</span><hr className="w-full border-white/20"/></div></BlurFade>
+                        <BlurFade delay={0.25 * 4} className="w-full max-w-[300px] mx-auto"><div className="flex items-center w-full gap-2 py-4 relative z-20"><hr className="w-full border-white/20"/><span className="text-xs font-semibold text-white/50">OR</span><hr className="w-full border-white/20"/></div></BlurFade>
                     </motion.div>}
                     {authStep === "password" && <motion.div key="password-title" initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: "easeOut" }} className="w-full flex flex-col items-center text-center gap-4">
-                        <BlurFade delay={0} className="w-full"><div className="text-center"><p className="font-serif font-light text-4xl sm:text-5xl tracking-tight text-white whitespace-nowrap">{isSignUp ? 'Create your password' : 'Enter your password'}</p></div></BlurFade>
-                        {isSignUp && <BlurFade delay={0.25 * 1}><p className="text-sm font-medium text-white/70">Your password must be at least 6 characters long.</p></BlurFade>}
+                        <BlurFade delay={0} className="w-full"><div className="text-center"><h1 className="mb-3 text-white text-center text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tighter leading-tight relative z-20 whitespace-nowrap">{isSignUp ? 'Create your password' : 'Enter your password'}</h1></div></BlurFade>
+                        {isSignUp && <BlurFade delay={0.25 * 1}><p className="text-sm font-medium text-white/70 relative z-20">Your password must be at least 6 characters long.</p></BlurFade>}
                     </motion.div>}
                      {authStep === "confirmPassword" && <motion.div key="confirm-title" initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: "easeOut" }} className="w-full flex flex-col items-center text-center gap-4">
-                         <BlurFade delay={0} className="w-full"><div className="text-center"><p className="font-serif font-light text-4xl sm:text-5xl tracking-tight text-white whitespace-nowrap">One Last Step</p></div></BlurFade>
-                         <BlurFade delay={0.25 * 1}><p className="text-sm font-medium text-white/70">Confirm your password to continue</p></BlurFade>
+                         <BlurFade delay={0} className="w-full"><div className="text-center"><h1 className="mb-3 text-white text-center text-4xl sm:text-5xl md:text-5xl font-extrabold tracking-tighter leading-tight relative z-20 whitespace-nowrap">One Last Step</h1></div></BlurFade>
+                         <BlurFade delay={0.25 * 1}><p className="text-sm font-medium text-white/70 relative z-20">Confirm your password to continue</p></BlurFade>
                     </motion.div>}
                 </AnimatePresence>
                 
