@@ -147,3 +147,87 @@ export async function analyseHandler(req, res) {
     }
   }
 }
+
+export async function analyseNotesHandler(req, res) {
+  const startTime = Date.now();
+
+  const notes = req.body.notes;
+  if (!notes || !Array.isArray(notes) || notes.length === 0) {
+    return res.status(400).json({
+      error: 'No valid notes provided in the request body.',
+    });
+  }
+
+  try {
+    const corpus = getCorpus();
+    if (corpus.length === 0) {
+      return res.status(500).json({
+        error: 'Corpus database is empty. Please run the seed script first.',
+      });
+    }
+
+    const automaton = getAutomaton();
+
+    const mappedQueryNotes = notes.map(midiToNoteName);
+
+    const qIntervals = encodeIntervals(notes);
+    
+    // We pass true for trace so the frontend visualizer gets it
+    const { matches: rawMatches, trace } = search(automaton, qIntervals, true);
+    
+    // Inject trackIndex 0
+    rawMatches.forEach(m => m.trackIndex = 0);
+
+    const filteredMatches = filterMatches(rawMatches, corpus);
+    const result = generateVerdict(filteredMatches);
+    const processingTime = Date.now() - startTime;
+    
+    const response = {
+      verdict: result.verdict,
+      summary: result.summary,
+      processingTimeMs: processingTime,
+      query: {
+        fileName: 'Hummed Audio',
+        trackName: 'Vocal',
+        trackIndex: 0,
+        noteCount: notes.length,
+        intervalCount: Math.max(0, notes.length - 1),
+      },
+      primaryMatch: result.primaryMatch
+        ? {
+            songName: result.primaryMatch.songName,
+            artist: result.primaryMatch.artist,
+            matchedIntervalSequence: result.primaryMatch.matchedIntervalSequence,
+            queryStart: result.primaryMatch.queryStart,
+            queryEnd: result.primaryMatch.queryEnd,
+            referenceStart: result.primaryMatch.referenceStart,
+            referenceEnd: result.primaryMatch.referenceEnd,
+            matchLength: result.primaryMatch.matchLength,
+            queryNotes: [], // Frontend will use simulationData.queryNotes
+            referenceNotes: result.primaryMatch.referenceNotes,
+            queryIntervals: [],
+            referenceIntervals: result.primaryMatch.referenceIntervals,
+            severity: result.primaryMatch.severity,
+            score: result.primaryMatch.score,
+          }
+        : null,
+      allMatches: result.allMatches,
+      corpus: {
+        totalSongs: corpus.length,
+        songs: corpus.map(c => ({ songName: c.songName, artist: c.artist })),
+      },
+      simulationData: {
+        executionTrace: trace,
+        queryNotes: mappedQueryNotes
+      }
+    };
+
+    return res.json(response);
+  } catch (err) {
+    console.error('Analysis error:', err);
+    return res.status(500).json({
+      error: `Analysis failed: ${err.message}`,
+    });
+  }
+}
+
