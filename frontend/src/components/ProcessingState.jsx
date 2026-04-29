@@ -74,7 +74,7 @@ export default function ProcessingState({ result, onComplete }) {
             )}
             
             {result && currentStep === 2 && (
-              <PatternMatchingStep key="step-2" executionTrace={executionTrace} />
+              <PatternMatchingStep key="step-2" executionTrace={executionTrace} queryNotes={queryNotes} />
             )}
             
             {result && currentStep === 3 && (

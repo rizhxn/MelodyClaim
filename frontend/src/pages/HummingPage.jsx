@@ -115,7 +115,9 @@ export default function HummingPage() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center pt-24 pb-12 overflow-hidden">
-      <WebGLShader />
+      <div className="absolute inset-0 z-0">
+        <WebGLShader />
+      </div>
       <div className="absolute top-1/2 right-1/4 translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#ff6d00] opacity-10 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="fixed top-4 pt-safe left-1/2 -translate-x-1/2 w-full max-w-[90%] md:max-w-md z-50 px-4 pointer-events-auto">

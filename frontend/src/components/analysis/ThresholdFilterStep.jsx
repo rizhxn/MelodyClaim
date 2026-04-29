@@ -42,7 +42,7 @@ export default function ThresholdFilterStep({ allMatches = [] }) {
         </p>
       </div>
 
-      <div className="w-full max-w-3xl glass-panel p-8 rounded-2xl border border-white/10 bg-black/20">
+      <div className="w-full max-w-3xl glass-panel p-8 rounded-2xl border border-white/5 bg-black/20" style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)' }}>
         <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
           {displayMatches.map((match, idx) => {
             const isRejected = match.matchLength < 7;
@@ -58,9 +58,9 @@ export default function ThresholdFilterStep({ allMatches = [] }) {
                 <motion.div 
                   className={`w-full p-4 rounded-xl border flex items-center justify-between transition-colors duration-500 ${
                     showFilter && isRejected 
-                      ? 'bg-red-500/10 border-red-500/30 text-white/50' 
+                      ? 'bg-red-500/5 border-red-500/20 text-white/30 grayscale' 
                       : showFilter && !isRejected
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-white'
+                        ? 'bg-[#00ffcc]/10 border-[#00ffcc]/30 text-white shadow-[0_0_15px_rgba(0,255,204,0.1)]'
                         : 'bg-white/5 border-white/10 text-white'
                   }`}
                 >
@@ -70,7 +70,7 @@ export default function ThresholdFilterStep({ allMatches = [] }) {
                   </div>
                   
                   <div className="flex items-center gap-4">
-                    <div className="font-mono bg-black/30 px-3 py-1 rounded-lg border border-white/5">
+                    <div className="font-mono bg-[#0a0a0f]/50 px-3 py-1 rounded-lg border border-white/5 text-sm">
                       {match.matchLength} intervals
                     </div>
                     
@@ -81,9 +81,9 @@ export default function ThresholdFilterStep({ allMatches = [] }) {
                         className="flex items-center gap-2 font-bold"
                       >
                         {isRejected ? (
-                          <span className="text-red-400 flex items-center gap-1"><XCircle className="w-5 h-5"/> Rejected</span>
+                          <span className="text-red-500 flex items-center gap-1 text-sm"><XCircle className="w-4 h-4"/> Below Threshold</span>
                         ) : (
-                          <span className="text-emerald-400 flex items-center gap-1"><CheckCircle2 className="w-5 h-5"/> Kept</span>
+                          <span className="text-[#00ffcc] flex items-center gap-1 text-sm"><CheckCircle2 className="w-4 h-4"/> Kept</span>
                         )}
                       </motion.div>
                     )}
@@ -96,7 +96,7 @@ export default function ThresholdFilterStep({ allMatches = [] }) {
                     initial={{ width: 0 }}
                     animate={{ width: '100%' }}
                     transition={{ duration: 0.4 }}
-                    className="absolute top-1/2 left-0 h-[2px] bg-red-500/70 -translate-y-1/2 z-10 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
+                    className="absolute top-1/2 left-0 h-[2px] bg-red-500/80 -translate-y-1/2 z-10 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
                   />
                 )}
               </motion.div>

@@ -25,39 +25,42 @@ export default function PatternMatch({ executionTrace, matchFound, songName, isA
     : '?';
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="w-full h-full flex flex-col items-center justify-center relative p-6 overflow-y-auto">
       
-      {/* Background ripples */}
-      <AnimatePresence>
-        {showMatch && matchFound && (
-          <>
-            {[1, 2, 3].map((i) => (
-              <motion.div
-                key={`ripple-${i}`}
-                initial={{ scale: 0.5, opacity: 0.5 }}
-                animate={{ scale: 3, opacity: 0 }}
-                transition={{ duration: 2, repeat: Infinity, delay: i * 0.4, ease: "easeOut" }}
-                className="absolute w-20 h-20 rounded-full border border-emerald-400/50"
-              />
-            ))}
-          </>
-        )}
-      </AnimatePresence>
+      {/* Node Container with Ripples */}
+      <div className="relative flex items-center justify-center">
+        {/* Background ripples */}
+        <AnimatePresence>
+          {showMatch && matchFound && (
+            <>
+              {[1, 2, 3].map((i) => (
+                <motion.div
+                  key={`ripple-${i}`}
+                  initial={{ scale: 0.8, opacity: 0.8 }}
+                  animate={{ scale: 2.5, opacity: 0 }}
+                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.4, ease: "easeOut" }}
+                  className="absolute w-24 h-24 rounded-full border-2 border-[#00ffcc]/50 z-0 pointer-events-none"
+                />
+              ))}
+            </>
+          )}
+        </AnimatePresence>
 
-      {/* Target Node (Accepting State) */}
-      <motion.div 
-        className="relative z-10 w-16 h-16 rounded-full flex items-center justify-center border-4"
-        animate={{ 
-          borderColor: showMatch ? (matchFound ? '#10b981' : '#f87171') : 'rgba(255,255,255,0.1)',
-          backgroundColor: showMatch ? (matchFound ? 'rgba(16,185,129,0.1)' : 'rgba(248,113,113,0.1)') : '#0A0A0A',
-          boxShadow: showMatch ? (matchFound ? '0 0 40px rgba(16,185,129,0.4)' : '0 0 40px rgba(248,113,113,0.2)') : 'none'
-        }}
-        transition={{ duration: 0.5 }}
-      >
-        <span className={`text-xl font-mono font-bold ${showMatch ? (matchFound ? 'text-emerald-400' : 'text-red-400') : 'text-white/40'}`}>
-          q{finalStateId}
-        </span>
-      </motion.div>
+        {/* Target Node (Accepting State) */}
+        <motion.div 
+          className="relative z-10 w-24 h-24 rounded-full flex shrink-0 items-center justify-center border-[4px]"
+          animate={{ 
+            borderColor: showMatch ? (matchFound ? '#00ffcc' : '#ef4444') : 'rgba(255,255,255,0.1)',
+            backgroundColor: showMatch ? (matchFound ? 'rgba(0,255,204,0.1)' : 'rgba(239,68,68,0.1)') : '#0a0a0f',
+            boxShadow: showMatch ? (matchFound ? '0 0 40px rgba(0,255,204,0.4)' : '0 0 40px rgba(239,68,68,0.2)') : 'none'
+          }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className={`text-3xl font-mono font-bold ${showMatch ? (matchFound ? 'text-[#00ffcc]' : 'text-red-500') : 'text-white/40'}`}>
+            q{finalStateId}
+          </span>
+        </motion.div>
+      </div>
 
       {/* Match Toast Notification */}
       <AnimatePresence>
@@ -65,18 +68,19 @@ export default function PatternMatch({ executionTrace, matchFound, songName, isA
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            className={`absolute bottom-4 left-4 right-4 p-3 rounded-lg border flex items-start gap-3 backdrop-blur-md ${
+            className={`relative z-20 w-full mt-6 p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-center text-center sm:text-left gap-3 sm:gap-4 ${
               matchFound 
-                ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-100'
-                : 'bg-red-950/80 border-red-500/50 text-red-100'
+                ? 'bg-[#00ffcc]/10 border-[#00ffcc]/50 text-[#00ffcc] shadow-[0_0_20px_rgba(0,255,204,0.1)]'
+                : 'bg-red-500/10 border-red-500/50 text-red-100 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
             }`}
+            style={{ backdropFilter: 'blur(8px)' }}
           >
-            {matchFound ? <CheckCircle2 className="w-5 h-5 text-emerald-400 mt-0.5" /> : <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />}
+            {matchFound ? <CheckCircle2 className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
             <div className="flex-1">
-              <h4 className="text-sm font-semibold mb-0.5">
+              <h4 className="text-sm font-bold tracking-wider mb-0.5">
                 {matchFound ? 'MATCH FOUND' : 'NO MATCH FOUND'}
               </h4>
-              <p className="text-xs opacity-80">
+              <p className="text-xs opacity-80 text-white">
                 {matchFound ? `"${songName}"` : 'Your melody is completely original.'}
               </p>
             </div>

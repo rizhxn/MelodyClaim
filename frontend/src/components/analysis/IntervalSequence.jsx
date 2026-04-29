@@ -41,12 +41,19 @@ export default function IntervalSequence({ intervals, isActive }) {
         {intervals.slice(0, 5).map((interval, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.5 + (i * 0.3), type: "spring" }}
-            className="w-10 h-10 rounded border border-white/20 bg-white/5 flex items-center justify-center text-sm font-mono font-medium text-[#9d4edd]"
+            initial={{ opacity: 0, scale: 0.8, x: -10, rotateX: 90 }}
+            animate={{ opacity: 1, scale: 1, x: 0, rotateX: 0 }}
+            transition={{ delay: 1.5 + (i * 0.2), duration: 0.6, type: "spring" }}
+            className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-sm font-mono font-bold text-white/50 relative group"
           >
-            {interval > 0 ? `+${interval}` : interval}
+            {/* Glow overlay that animates in */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5 + (i * 0.2) + 0.3, duration: 0.5 }}
+              className="absolute inset-0 rounded-full border border-[#00ffcc] bg-[#00ffcc]/10 shadow-[0_0_15px_rgba(0,255,204,0.3)] pointer-events-none"
+            />
+            <span className="relative z-10 group-hover:text-[#00ffcc] transition-colors">{interval > 0 ? `+${interval}` : interval}</span>
           </motion.div>
         ))}
       </div>
