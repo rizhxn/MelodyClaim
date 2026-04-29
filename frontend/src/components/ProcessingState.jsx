@@ -1,52 +1,116 @@
 import { useState, useEffect } from 'react';
-import { AutomatonProcessing } from './analysis/automaton-processing';
+import { motion, AnimatePresence } from 'framer-motion';
 import { WebGLShader } from './ui/web-gl-shader';
+import { ChevronRight } from 'lucide-react';
 
-// Mock data matching the AutomatonStructure
-const mockAutomaton = {
-  states: [
-    { id: 0, isAccepting: false },
-    { id: 1, isAccepting: false },
-    { id: 2, isAccepting: true },
-    { id: 3, isAccepting: false },
-    { id: 4, isAccepting: true },
-  ],
-  transitions: [
-    { from: 0, to: 1, symbol: 2 },
-    { from: 1, to: 2, symbol: -1 },
-    { from: 0, to: 3, symbol: 4 },
-    { from: 3, to: 4, symbol: 0 },
-  ],
-  failureLinks: [
-    { from: 1, to: 0 },
-    { from: 2, to: 0 },
-    { from: 3, to: 0 },
-    { from: 4, to: 0 },
-  ]
-};
+// Import individual steps
+import NoteSequenceStep from './analysis/NoteSequenceStep';
+import IntervalEncoderStep from './analysis/IntervalEncoderStep';
+import PatternMatchingStep from './analysis/PatternMatchingStep';
+import ThresholdFilterStep from './analysis/ThresholdFilterStep';
 
-const mockQueryIntervals = [2, -1, 4, 0, 7, -2];
+// Import final dashboard
+import AhoCorasickDashboard from './analysis/AhoCorasickDashboard';
 
-const mockExecutionTrace = [
-  { position: 0, symbol: 2, fromState: 0, toState: 1, usedFailure: false, matchFired: false, matches: [] },
-  { position: 1, symbol: -1, fromState: 1, toState: 2, usedFailure: false, matchFired: true, matches: ['Shape of You - Ed Sheeran'] },
-  { position: 2, symbol: 4, fromState: 2, toState: 3, usedFailure: true, matchFired: false, matches: [] },
-  { position: 3, symbol: 0, fromState: 3, toState: 4, usedFailure: false, matchFired: true, matches: ['Blinding Lights - The Weeknd'] },
-  { position: 4, symbol: 7, fromState: 4, toState: 0, usedFailure: true, matchFired: false, matches: [] },
-  { position: 5, symbol: -2, fromState: 0, toState: 0, usedFailure: true, matchFired: false, matches: [] },
-];
+export default function ProcessingState({ result, onComplete }) {
+  // sequence: 0 = Note Sequence, 1 = Interval Encoder, 2 = Pattern Matching, 3 = Threshold Filter, 4 = Final Dashboard
+  const [currentStep, setCurrentStep] = useState(0);
 
-export default function ProcessingState() {
+  useEffect(() => {
+    // If there's no result yet, stay on loading (step 0 doesn't advance until result is ready)
+    if (!result) return;
+
+    // Timeings for each step
+    const stepDurations = [
+      4000, // 0: Note Sequence
+      4000, // 1: Interval Encoder
+      // Pattern Matching: Cap at 6 seconds to avoid unnecessary delay, min 5s
+      Math.min(6000, Math.max(5000, (result?.simulationData?.executionTrace?.length || 0) * 300 + 1000)), // 2: Pattern Matching
+      4000, // 3: Threshold Filter
+    ];
+
+    if (currentStep < 4) {
+      const timer = setTimeout(() => {
+        setCurrentStep(prev => prev + 1);
+      }, stepDurations[currentStep]);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, result]);
+
+  // Extract necessary data from result
+  const queryNotes = result?.simulationData?.queryNotes || [];
+  const executionTrace = result?.simulationData?.executionTrace || [];
+  const queryIntervals = executionTrace.map(t => t.symbol) || [];
+  const allMatches = result?.allMatches || [];
+
   return (
-    <div className="w-full relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] overflow-hidden">
+    <div className="w-full relative z-10 flex flex-col items-center justify-center overflow-hidden pt-8 min-h-[80vh]">
       <WebGLShader />
-      <div className="relative z-10 w-full">
-        <AutomatonProcessing 
-          executionTrace={mockExecutionTrace}
-          queryIntervals={mockQueryIntervals}
-          automaton={mockAutomaton}
-          onComplete={() => {}}
-        />
+      
+      <div className="relative z-10 w-full flex flex-col items-center justify-center flex-1 px-4">
+        
+        {/* Render Step One By One */}
+        <div className="w-full max-w-5xl relative flex items-center justify-center h-full min-h-[500px]">
+          <AnimatePresence mode="wait">
+            {!result && (
+              <motion.div 
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-white/50 animate-pulse font-mono text-xl"
+              >
+                Initializing Plagiarism Detection Engine...
+              </motion.div>
+            )}
+
+            {result && currentStep === 0 && (
+              <NoteSequenceStep key="step-0" notes={queryNotes} />
+            )}
+            
+            {result && currentStep === 1 && (
+              <IntervalEncoderStep key="step-1" intervals={queryIntervals} />
+            )}
+            
+            {result && currentStep === 2 && (
+              <PatternMatchingStep key="step-2" executionTrace={executionTrace} />
+            )}
+            
+            {result && currentStep === 3 && (
+              <ThresholdFilterStep key="step-3" allMatches={allMatches} />
+            )}
+
+            {result && currentStep === 4 && (
+              <motion.div
+                key="step-final"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                className="w-full flex justify-center"
+              >
+                <AhoCorasickDashboard result={result} onComplete={onComplete} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Global Skip Button - Only shown when NOT on the final dashboard (step 4) */}
+        {result && currentStep < 4 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute bottom-10 z-20"
+          >
+            <button 
+              onClick={() => setCurrentStep(4)} // Skip to final dashboard
+              className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-all duration-300 flex items-center gap-2 group border border-white/10 hover:border-white/20 shadow-lg backdrop-blur-md"
+            >
+              Skip to results overview
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </motion.div>
+        )}
       </div>
     </div>
   );

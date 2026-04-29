@@ -33,32 +33,15 @@ export default function App() {
   const handleFileAccepted = useCallback(async (file) => {
     setAppState(STATE.PROCESSING);
     setError(null);
-    processingStartRef.current = Date.now();
 
     try {
       const formData = new FormData();
       formData.append('midi', file);
 
-      const responsePromise = fetch('/api/analyse', {
+      const response = await fetch('/api/analyse', {
         method: 'POST',
         body: formData,
       });
-
-      // Wait for both the API response and minimum display time
-      const [response] = await Promise.all([
-        responsePromise,
-        new Promise(resolve => {
-          const checkElapsed = () => {
-            const elapsed = Date.now() - processingStartRef.current;
-            if (elapsed >= MIN_PROCESSING_TIME) {
-              resolve();
-            } else {
-              setTimeout(resolve, MIN_PROCESSING_TIME - elapsed);
-            }
-          };
-          checkElapsed();
-        }),
-      ]);
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
@@ -67,12 +50,16 @@ export default function App() {
 
       const data = await response.json();
       setResult(data);
-      setAppState(STATE.RESULTS);
+      // Stay in processing state! The ProcessingState component will call handleAnimationComplete.
     } catch (err) {
       console.error('Analysis failed:', err);
       setError(err.message || 'Analysis failed. Please try again.');
       setAppState(STATE.UPLOAD);
     }
+  }, []);
+
+  const handleAnimationComplete = useCallback(() => {
+    setAppState(STATE.RESULTS);
   }, []);
 
   const handleReset = useCallback(() => {
@@ -117,10 +104,9 @@ export default function App() {
           </Routes>
         )}
 
-        {/* Processing State */}
         {appState === STATE.PROCESSING && (
           <div className="max-w-7xl mx-auto px-6 py-24 min-h-[80vh] flex items-center justify-center">
-             <ProcessingState />
+             <ProcessingState result={result} onComplete={handleAnimationComplete} />
           </div>
         )}
 

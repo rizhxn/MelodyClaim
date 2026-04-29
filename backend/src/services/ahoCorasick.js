@@ -116,25 +116,44 @@ export function buildAutomaton(patterns, nGramLength = 6) {
  *
  * @param {{ states: ACNode[], patternLengths: number[], subPatternRegistry: Array }} automaton
  * @param {number[]} text - The integer sequence to search
- * @returns {{ patternIndex: number, start: number, end: number, matched: number[] }[]}
+ * @param {boolean} recordTrace - Whether to record and return the execution trace
+ * @returns {{ matches: Array, trace: Array }}
  */
-export function search(automaton, text) {
+export function search(automaton, text, recordTrace = false) {
   const { states, patternLengths, subPatternRegistry } = automaton;
   const matches = [];
+  const trace = [];
   let current = 0;
 
   for (let i = 0; i < text.length; i++) {
     const symbol = text[i];
 
+    const fromState = current;
+    let usedFailure = false;
+
     // Follow failure links until we find a valid transition or reach root      
     while (current !== 0 && !states[current].children.has(symbol)) {
       current = states[current].failure;
+      usedFailure = true;
     }
 
     if (states[current].children.has(symbol)) {
       current = states[current].children.get(symbol);
     }
     // else current stays at 0 (root)
+
+    const matchFired = states[current].output.length > 0;
+
+    if (recordTrace && trace.length < 150) {
+      trace.push({
+        position: i,
+        symbol: symbol,
+        fromState: fromState,
+        toState: current,
+        usedFailure: usedFailure,
+        matchFired: matchFired
+      });
+    }
 
     // Check all outputs at this state
     for (const subIdx of states[current].output) {
@@ -155,5 +174,5 @@ export function search(automaton, text) {
       });
     }
   }
-  return matches;
+  return { matches, trace };
 }

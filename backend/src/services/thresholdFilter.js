@@ -51,7 +51,8 @@
  * @returns {FilteredMatch[]}
  */
 export function filterMatches(rawMatches, corpusEntries) {
-  // Step 1: Discard matches shorter than 6
+  // Step 1: Discard raw matches shorter than the n-gram length (6)
+  // We need these 6-grams to reach the stitching phase!
   const validMatches = rawMatches.filter(m => m.matched.length >= 6);
 
   if (validMatches.length === 0) return [];
@@ -94,6 +95,10 @@ export function filterMatches(rawMatches, corpusEntries) {
     if (!corpus) return null;
     
     const matchLength = m.matched.length;
+
+    // Apply the user's requirement: Threshold Filter = Minimum 7 consecutive intervals
+    if (matchLength < 7) return null;
+
     const severity = matchLength >= 10 ? 'STRUCTURAL' : 'MINOR';
 
     return {

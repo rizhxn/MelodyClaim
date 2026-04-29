@@ -17,6 +17,14 @@ import { buildAutomaton, search } from '../services/ahoCorasick.js';
 import { filterMatches } from '../services/thresholdFilter.js';
 import { generateVerdict } from '../services/verdictGenerator.js';
 import { getCorpus } from '../database/seed.js';
+import { getAutomaton } from '../services/automatonManager.js';
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+function midiToNoteName(midiNumber) {
+  const octave = Math.floor(midiNumber / 12) - 1;
+  const noteName = NOTE_NAMES[midiNumber % 12];
+  return `${noteName}${octave}`;
+}
 
 /**
  * POST /api/analyse
@@ -38,7 +46,7 @@ export async function analyseHandler(req, res) {
     const fileBuffer = fs.readFileSync(filePath);
     const { tracks } = parseMidi(fileBuffer);
 
-    // Step 3: Load corpus and build automaton
+    // Step 3: Load corpus and get pre-built automaton
     const corpus = getCorpus();
 
     if (corpus.length === 0) {
@@ -47,21 +55,27 @@ export async function analyseHandler(req, res) {
       });
     }
 
-    const patterns = corpus.map(c => c.intervals);
-    const automaton = buildAutomaton(patterns);
+    const automaton = getAutomaton();
+
+    // The primary track is used for the frontend trace animation
+    const primaryTrack = tracks[0] || { notes: [], trackName: 'Unknown', trackIndex: 0 };
+    const mappedQueryNotes = primaryTrack.notes.map(midiToNoteName);
 
     // Step 4: Search all tracks and accumulate matches
     let allRawMatches = [];
     let queryIntervalCount = 0;
     let queryNoteCount = 0;
+    let executionTrace = null;
     
     for (const track of tracks) {
       const qIntervals = encodeIntervals(track.notes);
       queryIntervalCount += qIntervals.length;
       queryNoteCount += track.notes.length;
       
-      const rawMatches = search(automaton, qIntervals);
+      const { matches: rawMatches, trace } = search(automaton, qIntervals, true);
       
+      if (!executionTrace) executionTrace = trace; // Capture trace from the first track
+
       // Inject the track info into the raw match (if needed downstream)
       rawMatches.forEach(m => m.trackIndex = track.trackIndex);
       allRawMatches.push(...rawMatches);
@@ -74,9 +88,6 @@ export async function analyseHandler(req, res) {
     const result = generateVerdict(filteredMatches);
 
     const processingTime = Date.now() - startTime;
-
-    // Use primary match track info if available, else just summarize the tracks
-    const firstTrack = tracks[0] || {};
     
     // Build response
     const response = {
@@ -85,10 +96,10 @@ export async function analyseHandler(req, res) {
       processingTimeMs: processingTime,
       query: {
         fileName: req.file.originalname,
-        trackName: tracks.length + ' melodic tracks combined', // Generalized
-        trackIndex: 0,
-        noteCount: queryNoteCount,
-        intervalCount: queryIntervalCount,
+        trackName: primaryTrack.trackName, 
+        trackIndex: primaryTrack.trackIndex,
+        noteCount: primaryTrack.notes.length,
+        intervalCount: Math.max(0, primaryTrack.notes.length - 1),
       },
       primaryMatch: result.primaryMatch
         ? {
@@ -100,9 +111,9 @@ export async function analyseHandler(req, res) {
             referenceStart: result.primaryMatch.referenceStart,
             referenceEnd: result.primaryMatch.referenceEnd,
             matchLength: result.primaryMatch.matchLength,
-            queryNotes: [], // We don't save the single track anymore, or we can just send empty array
+            queryNotes: [], // Frontend will use simulationData.queryNotes
             referenceNotes: result.primaryMatch.referenceNotes,
-            queryIntervals: [], // Optional
+            queryIntervals: [],
             referenceIntervals: result.primaryMatch.referenceIntervals,
             severity: result.primaryMatch.severity,
             score: result.primaryMatch.score,
@@ -113,6 +124,10 @@ export async function analyseHandler(req, res) {
         totalSongs: corpus.length,
         songs: corpus.map(c => ({ songName: c.songName, artist: c.artist })),
       },
+      simulationData: {
+        executionTrace,
+        queryNotes: mappedQueryNotes
+      }
     };
 
     return res.json(response);

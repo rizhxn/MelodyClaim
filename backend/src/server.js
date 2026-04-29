@@ -7,6 +7,7 @@ import apiRoutes from './routes/api.js';
 import authRoutes from './routes/authRoutes.js';
 import { seedDatabase } from './database/seed.js';
 import passport from './config/passport.js';
+import { initializeAutomaton } from './services/automatonManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,6 +33,9 @@ if (!fs.existsSync(dbPath)) {
   console.log('Database not found, seeding...');
   seedDatabase();
 }
+
+// Initialize Aho-Corasick Automaton offline (at server startup)
+initializeAutomaton();
 
 // API routes
 app.use('/api', apiRoutes);
