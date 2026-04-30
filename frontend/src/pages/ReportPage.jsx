@@ -65,19 +65,21 @@ export default function ReportPage() {
   const queryIntervals = result.simulationData?.queryIntervals || [];
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-[#0A0A0A]">
-      <div className="max-w-4xl mx-auto mb-6">
+    <div className="relative min-h-screen py-12 px-4">
+      <div className="relative z-10 max-w-4xl mx-auto mb-6">
         <Link to="/" className="inline-flex items-center text-white/50 hover:text-white transition-colors">
           <ArrowLeft size={20} className="mr-2" />
           Back to Analysis
         </Link>
       </div>
-      <VerdictReport 
-        verdict={verdict}
-        primaryMatch={primaryMatch}
-        meta={meta}
-        queryIntervals={queryIntervals}
-      />
+      <div className="relative z-10">
+        <VerdictReport 
+          verdict={verdict}
+          primaryMatch={primaryMatch}
+          meta={meta}
+          queryIntervals={queryIntervals}
+        />
+      </div>
     </div>
   );
 }

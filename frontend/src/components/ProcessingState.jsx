@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { WebGLShader } from './ui/web-gl-shader';
 import { ChevronRight } from 'lucide-react';
 
 // Import individual steps
@@ -46,23 +44,18 @@ export default function ProcessingState({ result, onComplete }) {
 
   return (
     <div className="w-full relative z-10 flex flex-col items-center justify-center overflow-hidden pt-8 min-h-[80vh]">
-      <WebGLShader />
-      
       <div className="relative z-10 w-full flex flex-col items-center justify-center flex-1 px-4">
         
         {/* Render Step One By One */}
         <div className="w-full max-w-5xl relative flex items-center justify-center h-full min-h-[500px]">
-          <AnimatePresence mode="wait">
+          <>
             {!result && (
-              <motion.div 
+              <div 
                 key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
                 className="text-white/50 animate-pulse font-mono text-xl"
               >
                 Initializing Plagiarism Detection Engine...
-              </motion.div>
+              </div>
             )}
 
             {result && currentStep === 0 && (
@@ -82,24 +75,19 @@ export default function ProcessingState({ result, onComplete }) {
             )}
 
             {result && currentStep === 4 && (
-              <motion.div
+              <div
                 key="step-final"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8 }}
                 className="w-full flex justify-center"
               >
                 <AhoCorasickDashboard result={result} onComplete={onComplete} />
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </>
         </div>
 
         {/* Global Skip Button - Only shown when NOT on the final dashboard (step 4) */}
         {result && currentStep < 4 && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div 
             className="absolute bottom-10 z-20"
           >
             <button 
@@ -109,7 +97,7 @@ export default function ProcessingState({ result, onComplete }) {
               Skip to results overview
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

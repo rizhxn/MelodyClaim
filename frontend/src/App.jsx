@@ -1,10 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import ProcessingState from './components/ProcessingState';
 import VerdictCard from './components/VerdictCard';
 import PianoRoll from './components/PianoRoll';
 import IntervalEvidence from './components/IntervalEvidence';
-import HowItWorks from './components/HowItWorks';
 import { Navbar } from './components/ui/mini-navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -23,14 +22,10 @@ const STATE = {
   RESULTS: 'results',
 };
 
-// Minimum display time for processing state (ms)
-const MIN_PROCESSING_TIME = 2500;
-
 export default function App() {
   const [appState, setAppState] = useState(STATE.UPLOAD);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const processingStartRef = useRef(null);
 
   const handleFileAccepted = useCallback(async (file) => {
     setAppState(STATE.PROCESSING);
@@ -85,10 +80,13 @@ export default function App() {
   }, [location.state, appState, navigate, location.pathname]);
 
   return (
-    <div className="bg-[#0A0A0A] min-h-screen text-white font-sans overflow-x-hidden selection:bg-[#9d4edd]/30 flex flex-col">
+    <div className="relative bg-[#0A0A0A] min-h-screen text-white font-sans overflow-x-hidden selection:bg-[#9d4edd]/30 flex flex-col">
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <WebGLShader />
+      </div>
       {!hideNavbar && <Navbar />}
 
-      <main className="relative flex-1 flex flex-col">
+      <main className="relative z-10 flex-1 flex flex-col">
         {/* Upload State / Landing Page with Routing */}
         {appState === STATE.UPLOAD && (
           <Routes>
@@ -116,9 +114,6 @@ export default function App() {
         {/* Results State */}
         {appState === STATE.RESULTS && result && (
           <div className="relative min-h-screen">
-            <div className="fixed inset-0 z-0">
-              <WebGLShader />
-            </div>
             <div className="relative z-10 max-w-7xl mx-auto px-6 py-32">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6 pt-10">
                 <h2 className="text-4xl font-bold tracking-tight">Analysis <span className="glow-text">Results</span></h2>
