@@ -21,22 +21,41 @@ export default function DFAStructure({ executionTrace, traceStep, isActive }) {
     
     let localIndex = 0;
     
+    const usedCoords = [];
+
     const getCoords = (stateId, localIdx) => {
       if (stateId === 0) return { cx: 260, cy: 54 };
 
       const positions = [
-        { cx: 260, cy: 74 },
-        { cx: 190, cy: 148 },
-        { cx: 330, cy: 136 },
-        { cx: 250, cy: 222 },
-        { cx: 130, cy: 260 },
-        { cx: 390, cy: 258 },
-        { cx: 220, cy: 348 },
-        { cx: 350, cy: 348 },
-        { cx: 270, cy: 430 },
+        { cx: 120, cy: 88 },
+        { cx: 260, cy: 86 },
+        { cx: 400, cy: 88 },
+        { cx: 170, cy: 180 },
+        { cx: 350, cy: 184 },
+        { cx: 100, cy: 288 },
+        { cx: 260, cy: 292 },
+        { cx: 420, cy: 288 },
+        { cx: 170, cy: 398 },
+        { cx: 350, cy: 398 },
       ];
 
-      return positions[localIdx % positions.length];
+      const base = positions[localIdx % positions.length];
+      let candidate = { ...base };
+      let attempts = 0;
+
+      while (usedCoords.some(point => distance(point, candidate) < 76) && attempts < 12) {
+        const ring = Math.floor(attempts / 4) + 1;
+        const direction = attempts % 4;
+        const dx = direction === 0 ? 24 * ring : direction === 1 ? -24 * ring : 0;
+        const dy = direction === 2 ? 24 * ring : direction === 3 ? -24 * ring : 0;
+        candidate = {
+          cx: clamp(base.cx + dx, 70, 450),
+          cy: clamp(base.cy + dy, 60, 430),
+        };
+        attempts += 1;
+      }
+
+      return candidate;
     };
 
     // Build the graph from the local sliding window of the trace
@@ -45,10 +64,14 @@ export default function DFAStructure({ executionTrace, traceStep, isActive }) {
       if (!step) continue;
 
       if (!newNodes.has(step.fromState)) {
-        newNodes.set(step.fromState, { id: step.fromState, ...getCoords(step.fromState, localIndex++) });
+        const coords = getCoords(step.fromState, localIndex++);
+        usedCoords.push(coords);
+        newNodes.set(step.fromState, { id: step.fromState, ...coords });
       }
       if (!newNodes.has(step.toState)) {
-        newNodes.set(step.toState, { id: step.toState, ...getCoords(step.toState, localIndex++) });
+        const coords = getCoords(step.toState, localIndex++);
+        usedCoords.push(coords);
+        newNodes.set(step.toState, { id: step.toState, ...coords });
       }
 
       const edgeKey = `${step.fromState}-${step.toState}-${step.symbol}-${i}`;
@@ -159,4 +182,12 @@ export default function DFAStructure({ executionTrace, traceStep, isActive }) {
       </svg>
     </div>
   );
+}
+
+function distance(a, b) {
+  return Math.hypot(a.cx - b.cx, a.cy - b.cy);
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
