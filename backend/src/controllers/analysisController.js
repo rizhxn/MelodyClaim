@@ -86,6 +86,9 @@ export async function analyseHandler(req, res) {
 
     // Step 6: Verdict
     const result = generateVerdict(filteredMatches);
+    const matchedTrack = result.primaryMatch
+      ? tracks.find(track => track.trackIndex === result.primaryMatch.trackIndex) || primaryTrack
+      : primaryTrack;
 
     const processingTime = Date.now() - startTime;
     
@@ -111,8 +114,11 @@ export async function analyseHandler(req, res) {
             referenceStart: result.primaryMatch.referenceStart,
             referenceEnd: result.primaryMatch.referenceEnd,
             matchLength: result.primaryMatch.matchLength,
-            queryNotes: [], // Frontend will use simulationData.queryNotes
+            trackIndex: result.primaryMatch.trackIndex || 0,
+            queryNotes: matchedTrack.notes,
+            queryVisualNotes: matchedTrack.visualNotes || [],
             referenceNotes: result.primaryMatch.referenceNotes,
+            referenceVisualNotes: [],
             queryIntervals: [],
             referenceIntervals: result.primaryMatch.referenceIntervals,
             severity: result.primaryMatch.severity,
@@ -126,7 +132,9 @@ export async function analyseHandler(req, res) {
       },
       simulationData: {
         executionTrace,
-        queryNotes: mappedQueryNotes
+        queryNotes: mappedQueryNotes,
+        queryPianoRollNotes: primaryTrack.notes,
+        queryVisualNotes: primaryTrack.visualNotes || [],
       }
     };
 
@@ -203,8 +211,11 @@ export async function analyseNotesHandler(req, res) {
             referenceStart: result.primaryMatch.referenceStart,
             referenceEnd: result.primaryMatch.referenceEnd,
             matchLength: result.primaryMatch.matchLength,
-            queryNotes: [], // Frontend will use simulationData.queryNotes
+            trackIndex: result.primaryMatch.trackIndex || 0,
+            queryNotes: notes,
+            queryVisualNotes: [],
             referenceNotes: result.primaryMatch.referenceNotes,
+            referenceVisualNotes: [],
             queryIntervals: [],
             referenceIntervals: result.primaryMatch.referenceIntervals,
             severity: result.primaryMatch.severity,
@@ -218,7 +229,9 @@ export async function analyseNotesHandler(req, res) {
       },
       simulationData: {
         executionTrace: trace,
-        queryNotes: mappedQueryNotes
+        queryNotes: mappedQueryNotes,
+        queryPianoRollNotes: notes,
+        queryVisualNotes: [],
       }
     };
 
@@ -230,4 +243,3 @@ export async function analyseNotesHandler(req, res) {
     });
   }
 }
-

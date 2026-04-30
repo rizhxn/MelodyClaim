@@ -42,8 +42,8 @@ export default function ThresholdFilterStep({ allMatches = [] }) {
         </p>
       </div>
 
-      <div className="w-full max-w-3xl glass-panel p-8 rounded-2xl border border-white/5 bg-black/20" style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)' }}>
-        <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+      <div className="w-full max-w-4xl h-[430px] glass-panel p-8 rounded-2xl border border-white/5 bg-black/20 flex items-center" style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)' }}>
+        <div className="w-full flex flex-col gap-4 max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
           {displayMatches.map((match, idx) => {
             const isRejected = match.matchLength < 7;
 
@@ -56,7 +56,7 @@ export default function ThresholdFilterStep({ allMatches = [] }) {
                 className="relative overflow-hidden"
               >
                 <motion.div 
-                  className={`w-full p-4 rounded-xl border flex items-center justify-between transition-colors duration-500 ${
+                  className={`w-full p-5 rounded-xl border flex items-center justify-between transition-colors duration-500 ${
                     showFilter && isRejected 
                       ? 'bg-red-500/5 border-red-500/20 text-white/30 grayscale' 
                       : showFilter && !isRejected

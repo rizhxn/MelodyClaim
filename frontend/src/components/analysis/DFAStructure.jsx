@@ -16,24 +16,27 @@ export default function DFAStructure({ executionTrace, traceStep, isActive }) {
     
     // We want a clean layout. We will display a localized window of the DFA
     // around the current trace step so it doesn't become a cluttered hairball.
-    const WINDOW_SIZE = 6;
+    const WINDOW_SIZE = 8;
     const startIdx = Math.max(0, traceStep - WINDOW_SIZE);
     
     let localIndex = 0;
     
     const getCoords = (stateId, localIdx) => {
-      // Clean vertical layout: main chain goes straight down.
-      // Small horizontal zig-zag just to prevent perfect overlap if there's backtracking,
-      // but Aho-Corasick normally has a straight trie path.
-      if (stateId === 0) return { cx: 150, cy: 40 };
-      
-      const xOffsets = [0, -30, 30, -15, 15];
-      const xOffset = xOffsets[localIdx % xOffsets.length];
-      
-      return { 
-        cx: 150 + xOffset, 
-        cy: 40 + (localIdx * 60)
-      };
+      if (stateId === 0) return { cx: 260, cy: 54 };
+
+      const positions = [
+        { cx: 260, cy: 74 },
+        { cx: 190, cy: 148 },
+        { cx: 330, cy: 136 },
+        { cx: 250, cy: 222 },
+        { cx: 130, cy: 260 },
+        { cx: 390, cy: 258 },
+        { cx: 220, cy: 348 },
+        { cx: 350, cy: 348 },
+        { cx: 270, cy: 430 },
+      ];
+
+      return positions[localIdx % positions.length];
     };
 
     // Build the graph from the local sliding window of the trace
@@ -68,13 +71,9 @@ export default function DFAStructure({ executionTrace, traceStep, isActive }) {
   const currentStepData = executionTrace[traceStep];
   const activeNodeId = currentStepData?.toState;
 
-  // Calculate dynamic viewBox height to keep the local window visible
-  const maxCy = nodesArray.length > 0 ? Math.max(...nodesArray.map(n => n.cy)) + 60 : 400;
-  const viewBoxY = Math.max(0, maxCy - 400);
-
   return (
-    <div className="w-full h-full min-h-[300px] flex items-center justify-center relative overflow-hidden">
-      <svg className="w-full h-full" viewBox={`0 ${viewBoxY} 300 400`} preserveAspectRatio="xMidYMid meet">
+    <div className="w-full h-full min-h-[560px] flex items-center justify-center relative overflow-hidden">
+      <svg className="w-full h-full" viewBox="0 0 520 500" preserveAspectRatio="xMidYMid meet">
         
         {/* Draw edges */}
         {edgesArray.map((edge) => {
@@ -84,7 +83,7 @@ export default function DFAStructure({ executionTrace, traceStep, isActive }) {
 
           // For failure links (backtracking), draw cleanly curved paths so they don't overlap with regular edges
           const isUpward = toNode.cy < fromNode.cy;
-          const curveOffset = isUpward ? 60 : 20;
+          const curveOffset = isUpward ? 90 : 34;
           const midX = (fromNode.cx + toNode.cx) / 2 + (edge.isFailure ? curveOffset : 0);
           const midY = (fromNode.cy + toNode.cy) / 2;
 
@@ -95,23 +94,23 @@ export default function DFAStructure({ executionTrace, traceStep, isActive }) {
                   d={`M ${fromNode.cx} ${fromNode.cy} Q ${midX + 40} ${midY} ${toNode.cx} ${toNode.cy}`}
                   fill="none"
                   stroke="rgba(239,68,68,0.8)" 
-                  strokeWidth="1.5" 
-                  strokeDasharray="4 4"
-                  style={{ filter: 'drop-shadow(0 0 5px rgba(239,68,68,0.5))' }}
+                  strokeWidth="2.4" 
+                  strokeDasharray="5 6"
+                  style={{ filter: 'drop-shadow(0 0 8px rgba(239,68,68,0.55))' }}
                 />
               ) : (
                 <line 
                   x1={fromNode.cx} y1={fromNode.cy} 
                   x2={toNode.cx} y2={toNode.cy} 
                   stroke="rgba(255,255,255,0.15)" 
-                  strokeWidth="1.5" 
+                  strokeWidth="2" 
                 />
               )}
               <text 
                 x={midX} 
                 y={midY}
                 fill="rgba(255,255,255,0.6)"
-                fontSize="10"
+                fontSize="14"
                 textAnchor="middle"
                 className="font-mono bg-black"
                 dy="-5"
@@ -132,22 +131,22 @@ export default function DFAStructure({ executionTrace, traceStep, isActive }) {
               key={`node-${node.id}`} 
               initial={{ scale: 0 }} 
               animate={{ 
-                scale: isActiveNode ? 1.1 : 1,
+                scale: isActiveNode ? 1.16 : 1,
                 y: isActiveNode ? [0, -2, 0] : 0
               }} 
               transition={{ type: 'spring', duration: 0.4 }}
             >
               <circle 
-                cx={node.cx} cy={node.cy} r="14" 
+                cx={node.cx} cy={node.cy} r="24" 
                 fill="#0a0a0f" 
                 stroke={isActiveNode ? (isFailureNode ? "rgba(239,68,68,1)" : "rgba(0,255,204,1)") : "rgba(255,255,255,0.3)"} 
-                strokeWidth={isActiveNode ? "2.5" : "1.5"} 
-                style={{ filter: isActiveNode ? (isFailureNode ? 'drop-shadow(0 0 10px rgba(239,68,68,0.5))' : 'drop-shadow(0 0 10px rgba(0,255,204,0.5))') : 'none' }}
+                strokeWidth={isActiveNode ? "3" : "2"} 
+                style={{ filter: isActiveNode ? (isFailureNode ? 'drop-shadow(0 0 18px rgba(239,68,68,0.6))' : 'drop-shadow(0 0 18px rgba(0,255,204,0.6))') : 'none' }}
               />
               <text 
                 x={node.cx} y={node.cy} 
                 fill={isActiveNode ? (isFailureNode ? "rgba(239,68,68,1)" : "rgba(0,255,204,1)") : "white"} 
-                fontSize="10" 
+                fontSize="15" 
                 textAnchor="middle" 
                 alignmentBaseline="middle"
                 className={isActiveNode ? "font-bold font-mono" : "font-mono"}

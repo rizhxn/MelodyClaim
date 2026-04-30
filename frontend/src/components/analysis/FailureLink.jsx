@@ -10,36 +10,36 @@ export default function FailureLink({ executionTrace, traceStep, isActive }) {
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
-      <svg className="w-full max-w-[340px] h-[140px] overflow-visible" viewBox="0 0 340 140">
+      <svg className="w-full max-w-[560px] h-[210px] overflow-visible" viewBox="0 0 560 210">
         
         {/* Normal Path representation */}
-        <line x1="40" y1="60" x2="160" y2="60" stroke="rgba(255,255,255,0.1)" strokeWidth="2" strokeDasharray="4 4" />
+        <line x1="90" y1="90" x2="260" y2="90" stroke="rgba(255,255,255,0.13)" strokeWidth="3" strokeDasharray="5 6" />
         
         {/* Nodes */}
-        <circle cx="40" cy="60" r="20" fill="#0a0a0f" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
-        <text x="40" y="60" fill="rgba(255,255,255,0.4)" fontSize="12" textAnchor="middle" alignmentBaseline="middle">q?</text>
+        <circle cx="90" cy="90" r="28" fill="#0a0a0f" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" />
+        <text x="90" y="90" fill="rgba(255,255,255,0.4)" fontSize="15" textAnchor="middle" alignmentBaseline="middle">q?</text>
 
         {/* Failed State Node */}
         <circle 
-          cx="160" cy="60" r="24" 
+          cx="260" cy="90" r="34" 
           fill="#0a0a0f" 
           stroke={isFailure ? "rgba(239,68,68,1)" : "rgba(255,255,255,0.2)"} 
-          strokeWidth="2" 
-          style={{ filter: isFailure ? 'drop-shadow(0 0 10px rgba(239,68,68,0.5))' : 'none' }}
+          strokeWidth="2.5" 
+          style={{ filter: isFailure ? 'drop-shadow(0 0 16px rgba(239,68,68,0.6))' : 'none' }}
         />
-        <text x="160" y="60" fill={isFailure ? "rgba(239,68,68,1)" : "rgba(255,255,255,0.4)"} fontSize="14" textAnchor="middle" alignmentBaseline="middle" className="font-bold">
+        <text x="260" y="90" fill={isFailure ? "rgba(239,68,68,1)" : "rgba(255,255,255,0.4)"} fontSize="17" textAnchor="middle" alignmentBaseline="middle" className="font-bold">
           q{currentStepData.fromState}
         </text>
 
         {/* Fallback Target Node */}
         <circle 
-          cx="280" cy="60" r="24" 
+          cx="440" cy="90" r="34" 
           fill="#0a0a0f" 
           stroke={isFailure ? "rgba(239,68,68,1)" : "rgba(255,255,255,0.2)"} 
-          strokeWidth="2" 
-          style={{ filter: isFailure ? 'drop-shadow(0 0 10px rgba(239,68,68,0.5))' : 'none' }}
+          strokeWidth="2.5" 
+          style={{ filter: isFailure ? 'drop-shadow(0 0 16px rgba(239,68,68,0.6))' : 'none' }}
         />
-        <text x="280" y="60" fill={isFailure ? "rgba(239,68,68,1)" : "rgba(255,255,255,0.4)"} fontSize="14" textAnchor="middle" alignmentBaseline="middle">
+        <text x="440" y="90" fill={isFailure ? "rgba(239,68,68,1)" : "rgba(255,255,255,0.4)"} fontSize="17" textAnchor="middle" alignmentBaseline="middle">
           q{currentStepData.toState}
         </text>
 
@@ -51,8 +51,8 @@ export default function FailureLink({ executionTrace, traceStep, isActive }) {
               animate={{ pathLength: 1, opacity: 0 }} 
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              x1="160" y1="60" x2="220" y2="10" 
-              stroke="rgba(239,68,68,1)" strokeWidth="3" 
+              x1="260" y1="90" x2="340" y2="24" 
+              stroke="rgba(239,68,68,1)" strokeWidth="4" 
             />
           )}
         </AnimatePresence>
@@ -63,9 +63,9 @@ export default function FailureLink({ executionTrace, traceStep, isActive }) {
             initial={{ pathLength: 0 }} 
             animate={{ pathLength: 1 }} 
             transition={{ duration: 0.3 }}
-            d="M 160 84 Q 220 150 280 84" 
-            fill="none" stroke="rgba(239,68,68,1)" strokeWidth="2" strokeDasharray="4 4"
-            style={{ filter: 'drop-shadow(0 0 5px rgba(239,68,68,0.5))' }}
+            d="M 260 124 Q 350 202 440 124" 
+            fill="none" stroke="rgba(239,68,68,1)" strokeWidth="3" strokeDasharray="5 6"
+            style={{ filter: 'drop-shadow(0 0 8px rgba(239,68,68,0.55))' }}
           />
         )}
       </svg>

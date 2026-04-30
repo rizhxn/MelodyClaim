@@ -93,8 +93,8 @@ export function Navbar() {
 
   const navLinksData = [
     { label: 'About', href: '#about' },
-    { label: 'Careers', href: '#2' },
-    { label: 'Discover', href: '#3' },
+    { label: 'MIDI', href: '#midi' },
+    { label: 'Humming', href: '#humming' },
   ];
 
   const loginButtonElement = (

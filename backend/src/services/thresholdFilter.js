@@ -107,6 +107,7 @@ export function filterMatches(rawMatches, corpusEntries) {
       artist: corpus.artist,
       matchLength,
       severity,
+      trackIndex: m.trackIndex || 0,
       queryStart: m.queryStart,
       queryEnd: m.queryEnd,
       matchedIntervalSequence: m.matched,

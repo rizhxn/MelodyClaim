@@ -32,7 +32,7 @@ export default function PatternMatchingStep({ executionTrace = [], queryNotes = 
       animate={{ opacity: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, filter: 'blur(10px)' }}
       transition={{ duration: 0.8 }}
-      className="w-full h-full flex flex-col items-center justify-center space-y-12"
+      className="w-full h-full flex flex-col items-center justify-center space-y-10"
     >
       <div className="text-center">
         <h2 className="text-3xl font-bold text-white mb-3 flex items-center justify-center gap-3">
@@ -44,7 +44,7 @@ export default function PatternMatchingStep({ executionTrace = [], queryNotes = 
         </p>
       </div>
 
-      <div className="w-full max-w-3xl glass-panel p-8 rounded-2xl border border-white/5 relative overflow-hidden flex flex-col items-center gap-10" style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)' }}>
+      <div className="w-full max-w-4xl h-[430px] glass-panel p-8 rounded-2xl border border-white/5 relative overflow-hidden flex flex-col items-center justify-center gap-10" style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(12px)' }}>
         
         {/* Interval Array Scanner Window */}
         <div className="flex gap-4 relative min-h-[90px] items-end pb-4">
@@ -72,7 +72,7 @@ export default function PatternMatchingStep({ executionTrace = [], queryNotes = 
                   </div>
                   
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-mono transition-colors duration-300 relative ${
+                    className={`w-14 h-14 rounded-xl flex items-center justify-center text-base font-mono transition-colors duration-300 relative ${
                       isCurrent 
                         ? 'bg-[#00ffcc]/10 text-[#00ffcc] border border-[#00ffcc]/50 shadow-[0_0_15px_rgba(0,255,204,0.3)] z-10' 
                         : 'bg-white/5 text-white/50 border border-white/10'

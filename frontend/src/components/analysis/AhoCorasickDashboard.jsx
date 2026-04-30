@@ -48,20 +48,31 @@ export default function AhoCorasickDashboard({ result, onComplete }) {
         </p>
       </div>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         
         <div className="lg:col-span-1 space-y-6 flex flex-col">
           <DashboardCard 
             title="1. Interval Encoding" 
             icon={<Music className="w-4 h-4 text-[#9d4edd]" />}
+            className="min-h-[220px]"
           >
             <IntervalSequence intervals={queryIntervals} isActive={true} />
           </DashboardCard>
 
           <DashboardCard 
+            title="2. Query Processing" 
+            icon={<Activity className="w-4 h-4 text-green-400" />}
+            className="min-h-[430px]"
+          >
+            <QueryProcessing executionTrace={executionTrace} traceStep={traceStep} isActive={true} queryNotes={result?.simulationData?.queryNotes || []} compact />
+          </DashboardCard>
+        </div>
+
+        <div className="lg:col-span-2">
+          <DashboardCard 
             title="3. DFA Structure" 
             icon={<Layers className="w-4 h-4 text-blue-400" />}
-            className="flex-1 min-h-[300px]"
+            className="h-full min-h-[676px]"
           >
             <DFAStructure executionTrace={executionTrace} traceStep={traceStep} isActive={true} />
           </DashboardCard>
@@ -69,19 +80,9 @@ export default function AhoCorasickDashboard({ result, onComplete }) {
 
         <div className="lg:col-span-2">
           <DashboardCard 
-            title="2. Query Processing" 
-            icon={<Activity className="w-4 h-4 text-green-400" />}
-            className="h-full min-h-[300px]"
-          >
-            <QueryProcessing executionTrace={executionTrace} traceStep={traceStep} isActive={true} queryNotes={result?.simulationData?.queryNotes || []} />
-          </DashboardCard>
-        </div>
-
-        <div className="lg:col-span-2">
-          <DashboardCard 
             title="4. Failure Link Handlers" 
             icon={<Link2Off className="w-4 h-4 text-red-400" />}
-            className="h-full min-h-[250px]"
+            className="h-[280px]"
           >
             <FailureLink executionTrace={executionTrace} traceStep={traceStep} isActive={true} />
           </DashboardCard>
@@ -91,7 +92,7 @@ export default function AhoCorasickDashboard({ result, onComplete }) {
           <DashboardCard 
             title="5. Pattern Match Detection" 
             icon={<CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-            className="h-full min-h-[250px]"
+            className="h-[280px]"
           >
             <PatternMatch executionTrace={executionTrace} matchFound={matchFound} songName={songName} isActive={true} />
           </DashboardCard>
@@ -124,7 +125,7 @@ function DashboardCard({ title, icon, children, className = '' }) {
           {title}
         </h3>
       </div>
-      <div className="p-6 flex-1 relative flex items-center justify-center w-full h-full">
+      <div className="p-6 flex-1 relative flex items-center justify-center w-full h-full min-h-0">
         {children}
       </div>
     </motion.div>

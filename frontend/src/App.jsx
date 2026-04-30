@@ -142,8 +142,10 @@ export default function App() {
                 <>
                   <div className="glass-panel p-6 border-white/10 mt-4">
                     <PianoRoll
-                      queryNotes={result.primaryMatch.queryNotes || []}
+                      queryNotes={result.primaryMatch.queryNotes || result.simulationData?.queryPianoRollNotes || []}
                       referenceNotes={result.primaryMatch.referenceNotes || []}
+                      queryVisualNotes={result.primaryMatch.queryVisualNotes || result.simulationData?.queryVisualNotes || []}
+                      referenceVisualNotes={result.primaryMatch.referenceVisualNotes || []}
                       matchStart={result.primaryMatch.queryStart}
                       matchEnd={result.primaryMatch.queryEnd}
                       referenceStart={result.primaryMatch.referenceStart}
