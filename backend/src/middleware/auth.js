@@ -20,7 +20,7 @@ export function requireAuth(req, res, next) {
     
     // Fetch current user data from database
     const user = db.prepare(`
-      SELECT id, email, display_name, role, avatar_url 
+      SELECT id, email, display_name, role, avatar_url, auth_provider, google_id, github_id, last_login_at, created_at
       FROM users 
       WHERE id = ?
     `).get(decoded.id);
@@ -34,7 +34,12 @@ export function requireAuth(req, res, next) {
       email: user.email,
       displayName: user.display_name,
       role: user.role,
-      avatarUrl: user.avatar_url
+      avatarUrl: user.avatar_url,
+      authProvider: user.auth_provider,
+      googleLinked: Boolean(user.google_id),
+      githubLinked: Boolean(user.github_id),
+      lastLoginAt: user.last_login_at,
+      createdAt: user.created_at
     };
 
     next();
@@ -62,13 +67,18 @@ export function optionalAuth(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = db.prepare('SELECT id, email, display_name, role, avatar_url FROM users WHERE id = ?').get(decoded.id);
+    const user = db.prepare('SELECT id, email, display_name, role, avatar_url, auth_provider, google_id, github_id, last_login_at, created_at FROM users WHERE id = ?').get(decoded.id);
     req.user = user ? {
       id: user.id,
       email: user.email,
       displayName: user.display_name,
       role: user.role,
-      avatarUrl: user.avatar_url
+      avatarUrl: user.avatar_url,
+      authProvider: user.auth_provider,
+      googleLinked: Boolean(user.google_id),
+      githubLinked: Boolean(user.github_id),
+      lastLoginAt: user.last_login_at,
+      createdAt: user.created_at
     } : null;
   } catch (err) {
     req.user = null;

@@ -87,9 +87,7 @@ export default function ProcessingState({ result, onComplete }) {
 
         {/* Global Skip Button - Only shown when NOT on the final dashboard (step 4) */}
         {result && currentStep < 4 && (
-          <div 
-            className="absolute bottom-10 z-20"
-          >
+          <div className="relative z-20 mt-8 mb-4 flex justify-center">
             <button 
               onClick={() => setCurrentStep(4)} // Skip to final dashboard
               className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-all duration-300 flex items-center gap-2 group border border-white/10 hover:border-white/20 shadow-lg backdrop-blur-md"

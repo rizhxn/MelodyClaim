@@ -70,6 +70,7 @@ export function filterMatches(rawMatches, corpusEntries) {
     if (!fragmentsByAlignment.has(key)) {
       fragmentsByAlignment.set(key, {
         patternIndex: m.patternIndex,
+        trackIndex: m.trackIndex || 0,
         queryStart: m.start,
         queryEnd: m.end,
         referenceStart: m.referenceStart,

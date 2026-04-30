@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRoutes from './routes/api.js';
 import authRoutes from './routes/authRoutes.js';
-import { seedDatabase } from './database/seed.js';
+import { isCorpusDatabaseCurrent, seedDatabase } from './database/seed.js';
 import passport from './config/passport.js';
 import { initializeAutomaton } from './services/automatonManager.js';
 
@@ -27,10 +27,9 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Seed database if it doesn't exist
-const dbPath = path.join(__dirname, '..', 'corpus.db');
-if (!fs.existsSync(dbPath)) {
-  console.log('Database not found, seeding...');
+// Seed or refresh the corpus database when the built-in/source corpus changes.
+if (!isCorpusDatabaseCurrent()) {
+  console.log('Corpus database missing or stale, seeding...');
   seedDatabase();
 }
 

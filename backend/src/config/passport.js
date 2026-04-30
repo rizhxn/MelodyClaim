@@ -14,7 +14,11 @@ passport.use(new GoogleStrategy({
   callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    const email = profile.emails[0].value;
+    const email = profile.emails?.[0]?.value;
+    if (!email) {
+      return done(new Error('Google account did not return an email address'), null);
+    }
+
     const googleId = profile.id;
     const displayName = profile.displayName;
     const avatarUrl = profile.photos[0]?.value;
@@ -28,17 +32,51 @@ passport.use(new GoogleStrategy({
 
       if (user) {
         // Link Google account to existing user
-        db.prepare('UPDATE users SET google_id = ?, avatar_url = ? WHERE id = ?')
-          .run(googleId, avatarUrl, user.id);
+        db.prepare(`
+          UPDATE users
+          SET google_id = ?,
+              google_email = ?,
+              google_display_name = ?,
+              display_name = COALESCE(NULLIF(display_name, ''), ?),
+              avatar_url = COALESCE(?, avatar_url),
+              auth_provider = CASE WHEN auth_provider = 'email' THEN 'email_google' ELSE auth_provider END,
+              last_login_at = CURRENT_TIMESTAMP,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).run(googleId, email, displayName, displayName, avatarUrl, user.id);
+        user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
       } else {
         // Create new user
         const result = db.prepare(`
-          INSERT INTO users (email, google_id, display_name, avatar_url, password_hash, role)
-          VALUES (?, ?, ?, ?, '', 'user')
-        `).run(email, googleId, displayName, avatarUrl);
+          INSERT INTO users (
+            email,
+            google_id,
+            google_email,
+            google_display_name,
+            display_name,
+            avatar_url,
+            password_hash,
+            role,
+            auth_provider,
+            last_login_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, '', 'user', 'google', CURRENT_TIMESTAMP)
+        `).run(email, googleId, email, displayName, displayName, avatarUrl);
 
-        user = { id: result.lastInsertRowid, email, display_name: displayName, role: 'user', avatar_url: avatarUrl };
+        user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
       }
+    } else {
+      db.prepare(`
+        UPDATE users
+        SET google_email = ?,
+            google_display_name = ?,
+            display_name = COALESCE(NULLIF(display_name, ''), ?),
+            avatar_url = COALESCE(?, avatar_url),
+            last_login_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(email, displayName, displayName, avatarUrl, user.id);
+      user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
     }
 
     return done(null, user);
@@ -69,16 +107,50 @@ passport.use(new GitHubStrategy({
       user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
 
       if (user) {
-        db.prepare('UPDATE users SET github_id = ?, avatar_url = ? WHERE id = ?')
-          .run(githubId, avatarUrl, user.id);
+        db.prepare(`
+          UPDATE users
+          SET github_id = ?,
+              github_email = ?,
+              github_display_name = ?,
+              display_name = COALESCE(NULLIF(display_name, ''), ?),
+              avatar_url = COALESCE(?, avatar_url),
+              auth_provider = CASE WHEN auth_provider = 'email' THEN 'email_github' ELSE auth_provider END,
+              last_login_at = CURRENT_TIMESTAMP,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).run(githubId, email, displayName, displayName, avatarUrl, user.id);
+        user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
       } else {
         const result = db.prepare(`
-          INSERT INTO users (email, github_id, display_name, avatar_url, password_hash, role)
-          VALUES (?, ?, ?, ?, '', 'user')
-        `).run(email, githubId, displayName, avatarUrl);
+          INSERT INTO users (
+            email,
+            github_id,
+            github_email,
+            github_display_name,
+            display_name,
+            avatar_url,
+            password_hash,
+            role,
+            auth_provider,
+            last_login_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, '', 'user', 'github', CURRENT_TIMESTAMP)
+        `).run(email, githubId, email, displayName, displayName, avatarUrl);
 
-        user = { id: result.lastInsertRowid, email, display_name: displayName, role: 'user', avatar_url: avatarUrl };
+        user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
       }
+    } else {
+      db.prepare(`
+        UPDATE users
+        SET github_email = ?,
+            github_display_name = ?,
+            display_name = COALESCE(NULLIF(display_name, ''), ?),
+            avatar_url = COALESCE(?, avatar_url),
+            last_login_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(email, displayName, displayName, avatarUrl, user.id);
+      user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
     }
 
     return done(null, user);
