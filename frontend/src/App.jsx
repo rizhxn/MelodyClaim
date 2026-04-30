@@ -13,6 +13,7 @@ import HummingPage from './pages/HummingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import { AuthCallback } from './pages/AuthCallback.jsx';
+import ReportPage from './pages/ReportPage';
 import { WebGLShader } from './components/ui/web-gl-shader';
 
 // App states
@@ -71,11 +72,11 @@ export default function App() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const hideNavbar = location.pathname === '/midi' || location.pathname === '/humming';
+  const hideNavbar = location.pathname === '/midi' || location.pathname === '/humming' || location.pathname === '/report';
 
   // Listen for redirected state from HummingPage's "Full Analysis" Dynamic Island button
   useEffect(() => {
-    if (location.state && location.state.result && appState === STATE.UPLOAD) {
+    if (location.pathname === '/midi' && location.state?.result && appState === STATE.UPLOAD) {
       setResult(location.state.result);
       setAppState(STATE.RESULTS);
       // Clear the state so refreshing doesn't lock it
@@ -102,6 +103,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/report" element={<ReportPage />} />
           </Routes>
         )}
 
@@ -120,19 +122,25 @@ export default function App() {
             <div className="relative z-10 max-w-7xl mx-auto px-6 py-32">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6 pt-10">
                 <h2 className="text-4xl font-bold tracking-tight">Analysis <span className="glow-text">Results</span></h2>
-                <button
-                  id="reset-button"
-                  className="group relative px-6 py-3 glass-panel hover:bg-white/10 transition-all duration-300 overflow-hidden flex items-center justify-center"
-                  onClick={handleReset}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#9d4edd]/20 to-[#ff6d00]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <span className="text-white relative z-10 font-medium tracking-wide">← Analyze Another</span>
-                </button>
+                  <button
+                    id="reset-button"
+                    className="group relative px-6 py-3 glass-panel hover:bg-white/10 transition-all duration-300 overflow-hidden flex items-center justify-center"
+                    onClick={handleReset}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#9d4edd]/20 to-[#ff6d00]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span className="text-white relative z-10 font-medium tracking-wide">← Analyze Another</span>
+                  </button>
               </div>
 
               <div className="grid gap-8">
                 <div className="glass-panel p-2">
-                  <VerdictCard result={result} />
+                  <VerdictCard 
+                    result={result} 
+                    onDownloadReport={() => {
+                      setAppState(STATE.UPLOAD);
+                      navigate('/report', { state: { result } });
+                    }} 
+                  />
                 </div>
 
               {result.primaryMatch && (

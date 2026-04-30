@@ -1,6 +1,6 @@
 import { Music, User, Clock, AlertTriangle, CheckCircle2, Info, Disc, Download } from 'lucide-react';
 
-export default function VerdictCard({ result }) {
+export default function VerdictCard({ result, onDownloadReport }) {
   if (!result) return null;
 
   const { verdict, summary, primaryMatch, query } = result;
@@ -49,7 +49,7 @@ export default function VerdictCard({ result }) {
           
           {/* Download Plagiarism Report Action Button */}
           <button 
-            onClick={() => window.print()}
+            onClick={onDownloadReport}
             className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all font-medium text-sm group"
           >
             <Download className="w-4 h-4 opacity-70 group-hover:scale-110 transition-transform" />

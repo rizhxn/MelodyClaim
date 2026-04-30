@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { analyseHandler, analyseNotesHandler } from '../controllers/analysisController.js';
 import { signupHandler, loginHandler } from '../controllers/authController.js';
+import { recognizeHummingWithAcrCloud } from '../services/acrCloudHumming.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,11 +46,38 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
 });
 
+const audioUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
 // POST /api/analyse
 router.post('/analyse', upload.single('midi'), analyseHandler);
 
 // POST /api/analyse/notes
 router.post('/analyse/notes', analyseNotesHandler);
+
+// POST /api/recognize/humming
+router.post('/recognize/humming', audioUpload.single('audio'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No humming audio provided.' });
+  }
+
+  try {
+    const result = await recognizeHummingWithAcrCloud({
+      buffer: req.file.buffer,
+      filename: req.file.originalname,
+      mimetype: req.file.mimetype,
+    });
+
+    return res.json(result);
+  } catch (err) {
+    console.error('Humming recognition error:', err);
+    return res.status(502).json({
+      error: err.message || 'External humming recognition failed.',
+    });
+  }
+});
 
 // POST /api/signup
 router.post('/signup', signupHandler);
