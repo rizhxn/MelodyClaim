@@ -37,8 +37,8 @@ router.post('/signup', async (req, res) => {
 
     // Insert user
     const result = db.prepare(`
-      INSERT INTO users (email, password_hash, display_name, role)
-      VALUES (?, ?, ?, 'user')
+      INSERT INTO users (email, password_hash, display_name, role, auth_provider, last_login_at)
+      VALUES (?, ?, ?, 'user', 'email', CURRENT_TIMESTAMP)
     `).run(email, passwordHash, displayName || email.split('@')[0]);
 
     const userId = result.lastInsertRowid;
@@ -91,6 +91,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    db.prepare(`
+      UPDATE users
+      SET last_login_at = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(user.id);
+
     // Generate JWT
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
@@ -106,7 +113,8 @@ router.post('/login', async (req, res) => {
         email: user.email,
         displayName: user.display_name,
         role: user.role,
-        avatarUrl: user.avatar_url
+        avatarUrl: user.avatar_url,
+        authProvider: user.auth_provider
       }
     });
 

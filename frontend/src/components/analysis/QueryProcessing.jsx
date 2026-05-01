@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function QueryProcessing({ executionTrace, traceStep, isActive, queryNotes = [] }) {
+export default function QueryProcessing({ executionTrace, traceStep, isActive, queryNotes = [], compact = false }) {
   if (!isActive || !executionTrace || executionTrace.length === 0) {
     return <div className="text-white/20 text-xs text-center">Waiting for DFA construction...</div>;
   }
@@ -13,10 +13,10 @@ export default function QueryProcessing({ executionTrace, traceStep, isActive, q
   const currentStepData = executionTrace[traceStep] || executionTrace[executionTrace.length - 1];
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-12 relative overflow-hidden">
+    <div className={`w-full h-full flex flex-col items-center justify-center relative overflow-hidden ${compact ? 'gap-8' : 'gap-14'}`}>
       
       {/* Interval Array Scanner Window */}
-      <div className="flex gap-4 relative items-end pb-4 min-h-[90px]">
+      <div className={`flex relative items-end pb-4 ${compact ? 'gap-3 min-h-[96px]' : 'gap-5 min-h-[110px]'}`}>
         <AnimatePresence mode="popLayout">
           {visibleTrace.map((t, idx) => {
             const globalIdx = startIdx + idx;
@@ -41,7 +41,7 @@ export default function QueryProcessing({ executionTrace, traceStep, isActive, q
                 </div>
                 
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-mono transition-colors duration-300 relative ${
+                  className={`${compact ? 'w-12 h-12' : 'w-14 h-14'} rounded-xl flex items-center justify-center ${compact ? 'text-sm' : 'text-base'} font-mono transition-colors duration-300 relative ${
                     isCurrent 
                       ? 'bg-[#00ffcc]/10 text-[#00ffcc] border border-[#00ffcc]/50 shadow-[0_0_15px_rgba(0,255,204,0.3)] z-10' 
                       : 'bg-white/5 text-white/50 border border-white/10'
@@ -70,7 +70,7 @@ export default function QueryProcessing({ executionTrace, traceStep, isActive, q
       </div>
 
       {/* DFA Linear Path for the visible window */}
-      <div className="relative w-full max-w-[500px] h-[60px] flex items-center justify-between px-4 mt-4">
+      <div className={`relative w-full ${compact ? 'max-w-[360px] h-[70px]' : 'max-w-[620px] h-[90px]'} flex items-center justify-between px-4 mt-4`}>
         
         {/* Background edges with flowing glow */}
         <div className="absolute top-1/2 left-[20px] right-[20px] h-[2px] bg-white/10 -translate-y-1/2 overflow-hidden">
@@ -94,7 +94,7 @@ export default function QueryProcessing({ executionTrace, traceStep, isActive, q
           return (
             <div key={`node-${globalIdx}`} className="relative z-10 flex flex-col items-center gap-2">
               <motion.div 
-                className={`w-12 h-12 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all duration-300 ${
+                className={`${compact ? 'w-12 h-12 text-xs' : 'w-16 h-16 text-sm'} rounded-full flex items-center justify-center font-mono font-bold transition-all duration-300 ${
                   isActiveNode 
                     ? (t.usedFailure ? 'bg-[#0a0a0f] border border-red-500 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]' : 'bg-[#0a0a0f] border border-[#00ffcc] text-[#00ffcc] shadow-[0_0_20px_rgba(0,255,204,0.5)]')
                     : isPassed 
@@ -120,7 +120,7 @@ export default function QueryProcessing({ executionTrace, traceStep, isActive, q
       </div>
       
       {/* Live Status Text */}
-      <div className="absolute bottom-2 text-xs font-mono">
+      <div className={`absolute bottom-2 ${compact ? 'text-[11px] px-4 text-center' : 'text-sm'} font-mono`}>
         <motion.div 
           key={traceStep}
           initial={{ opacity: 0, y: 5 }}

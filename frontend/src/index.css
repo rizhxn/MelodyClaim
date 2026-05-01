@@ -59,3 +59,39 @@
   background: #484f58;
 }
 
+@media print {
+  body {
+    background: white !important;
+  }
+
+  /* Hide non-essential elements when printing */
+  nav, footer, button {
+    display: none !important;
+  }
+
+  /* Ensure verdict report prints cleanly */
+  .verdict-report {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Force light colors for readability */
+  * {
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Keep semantic colors */
+  .text-red-500, .border-red-500, .bg-red-500, .text-\[\#ef4444\], .border-\[\#ef4444\] {
+    color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+  }
+
+  .text-green-500, .border-green-500, .bg-green-500, .text-\[\#5DCAA5\], .border-\[\#5DCAA5\] {
+    color: #5DCAA5 !important;
+    border-color: #5DCAA5 !important;
+    background-color: rgba(93, 202, 165, 0.1) !important;
+  }
+}

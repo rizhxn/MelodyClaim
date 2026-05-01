@@ -25,7 +25,7 @@ export default function PatternMatch({ executionTrace, matchFound, songName, isA
     : '?';
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center relative p-6 overflow-y-auto">
+    <div className="w-full h-full flex flex-col items-center justify-center relative p-4 overflow-hidden">
       
       {/* Node Container with Ripples */}
       <div className="relative flex items-center justify-center">
@@ -39,7 +39,7 @@ export default function PatternMatch({ executionTrace, matchFound, songName, isA
                   initial={{ scale: 0.8, opacity: 0.8 }}
                   animate={{ scale: 2.5, opacity: 0 }}
                   transition={{ duration: 2, repeat: Infinity, delay: i * 0.4, ease: "easeOut" }}
-                  className="absolute w-24 h-24 rounded-full border-2 border-[#00ffcc]/50 z-0 pointer-events-none"
+                  className="absolute w-20 h-20 rounded-full border-2 border-[#00ffcc]/45 z-0 pointer-events-none"
                 />
               ))}
             </>
@@ -48,7 +48,7 @@ export default function PatternMatch({ executionTrace, matchFound, songName, isA
 
         {/* Target Node (Accepting State) */}
         <motion.div 
-          className="relative z-10 w-24 h-24 rounded-full flex shrink-0 items-center justify-center border-[4px]"
+          className="relative z-10 w-20 h-20 rounded-full flex shrink-0 items-center justify-center border-[3px]"
           animate={{ 
             borderColor: showMatch ? (matchFound ? '#00ffcc' : '#ef4444') : 'rgba(255,255,255,0.1)',
             backgroundColor: showMatch ? (matchFound ? 'rgba(0,255,204,0.1)' : 'rgba(239,68,68,0.1)') : '#0a0a0f',
@@ -68,19 +68,19 @@ export default function PatternMatch({ executionTrace, matchFound, songName, isA
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            className={`relative z-20 w-full mt-6 p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-center text-center sm:text-left gap-3 sm:gap-4 ${
+            className={`relative z-20 w-full max-w-[300px] mt-5 p-3 rounded-xl border flex items-center justify-center text-left gap-3 ${
               matchFound 
                 ? 'bg-[#00ffcc]/10 border-[#00ffcc]/50 text-[#00ffcc] shadow-[0_0_20px_rgba(0,255,204,0.1)]'
                 : 'bg-red-500/10 border-red-500/50 text-red-100 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
             }`}
             style={{ backdropFilter: 'blur(8px)' }}
           >
-            {matchFound ? <CheckCircle2 className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
+            {matchFound ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
             <div className="flex-1">
               <h4 className="text-sm font-bold tracking-wider mb-0.5">
                 {matchFound ? 'MATCH FOUND' : 'NO MATCH FOUND'}
               </h4>
-              <p className="text-xs opacity-80 text-white">
+              <p className="text-xs leading-snug opacity-80 text-white">
                 {matchFound ? `"${songName}"` : 'Your melody is completely original.'}
               </p>
             </div>

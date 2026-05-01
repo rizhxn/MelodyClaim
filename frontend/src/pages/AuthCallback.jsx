@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
 export function AuthCallback() {
   const [searchParams] = useSearchParams();
@@ -25,7 +24,7 @@ export function AuthCallback() {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
+    <div className="relative min-h-screen flex items-center justify-center">
       <p className="text-white">Completing authentication...</p>
     </div>
   );

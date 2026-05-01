@@ -5,14 +5,6 @@ import * as THREE from "three"
 
 export function WebGLShader() {
   const canvasRef = useRef(null)
-  const sceneRef = useRef({
-    scene: null,
-    camera: null,
-    renderer: null,
-    mesh: null,
-    uniforms: null,
-    animationId: null,
-  })
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -123,7 +115,7 @@ export function WebGLShader() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full block pointer-events-none -z-10"
+      className="fixed inset-0 z-0 block h-full w-full pointer-events-none"
     />
   )
 }

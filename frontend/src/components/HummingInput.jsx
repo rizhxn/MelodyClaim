@@ -1,14 +1,20 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { usePitchDetection } from '../hooks/usePitchDetection'
-import { motion } from 'framer-motion'
 import { Mic } from 'lucide-react'
 
+const MAX_RECORDING_MS = 16000
+const MIN_NOTES = 8
+
 export function HummingInput({ onComplete }) {
-  const { isRecording, currentNote, startRecording, stopRecording } = usePitchDetection()
+  const { isRecording, detectedNotes, currentNote, startRecording, stopRecording } = usePitchDetection()
   const [error, setError] = useState('')
+  const [elapsed, setElapsed] = useState(0)
+  const timerRef = useRef(null)
+  const stopTimeoutRef = useRef(null)
 
   async function handleStart() {
     setError('')
+    setElapsed(0)
     try {
       await startRecording()
     } catch (err) {
@@ -16,17 +22,42 @@ export function HummingInput({ onComplete }) {
     }
   }
 
-  function handleStop() {
-    const notes = stopRecording()
+  const handleStop = useCallback(async () => {
+    if (!isRecording) return
+
+    clearInterval(timerRef.current)
+    clearTimeout(stopTimeoutRef.current)
+
+    const { notes, audioBlob } = await stopRecording()
     
-    if (notes.length < 7) {
-      setError('Not enough notes detected. Please hum a longer melody.')
+    if (notes.length < MIN_NOTES) {
+      setError(`Only ${notes.length} notes detected. Hum a clearer melody for 8-16 seconds.`)
       return
     }
 
-    // Send notes to backend for analysis
-    onComplete(notes)
-  }
+    // Send both raw audio and extracted notes. The backend can use audio for
+    // external humming recognition and notes for local structural matching.
+    onComplete({ notes, audioBlob })
+  }, [isRecording, onComplete, stopRecording])
+
+  useEffect(() => {
+    if (!isRecording) return undefined
+
+    const startedAt = Date.now()
+    timerRef.current = setInterval(() => {
+      setElapsed(Date.now() - startedAt)
+    }, 200)
+    stopTimeoutRef.current = setTimeout(() => {
+      handleStop()
+    }, MAX_RECORDING_MS)
+
+    return () => {
+      clearInterval(timerRef.current)
+      clearTimeout(stopTimeoutRef.current)
+    }
+  }, [handleStop, isRecording])
+
+  const progress = Math.min(100, (elapsed / MAX_RECORDING_MS) * 100)
 
   return (
     <div className="w-full max-w-lg mx-auto flex flex-col items-center justify-center">
@@ -46,20 +77,18 @@ export function HummingInput({ onComplete }) {
                 Click to Start Humming
               </div>
               <div className="text-white/50 text-sm mt-1">
-                Make sure your microphone is enabled
+                Hum 8-16 seconds of the hook
               </div>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-6 w-full">
-            <motion.div
-              className="w-24 h-24 rounded-full bg-[#9d4edd]/20 border-4 border-[#9d4edd] flex items-center justify-center cursor-pointer"
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
+            <div
+              className="w-24 h-24 rounded-full bg-[#9d4edd]/20 border-4 border-[#9d4edd] flex items-center justify-center cursor-pointer animate-pulse"
               onClick={handleStop}
             >
                <Mic size={36} className="text-[#9d4edd]" />
-            </motion.div>
+            </div>
 
             <div className="text-center">
               <div className="text-[#9d4edd] font-semibold text-lg mb-2">
@@ -74,6 +103,19 @@ export function HummingInput({ onComplete }) {
                   Waiting for pitch...
                 </p>
               )}
+            </div>
+
+            <div className="w-full max-w-xs">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-[#9d4edd] transition-all duration-200"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="mt-2 flex justify-between text-xs text-white/45">
+                <span>{Math.ceil((MAX_RECORDING_MS - elapsed) / 1000)}s left</span>
+                <span>{detectedNotes.length} captured</span>
+              </div>
             </div>
           </div>
         )}

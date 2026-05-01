@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Binary, Scale } from 'lucide-react';
+import { Sparkles, Binary, Scale, Music2, Keyboard, Mic } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Features() {
   const container = {
@@ -35,8 +36,9 @@ export default function Features() {
   ];
 
   return (
-    <section id="about" className="relative py-24 pb-48 z-10">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="relative z-10 pb-24">
+      <section id="about" className="scroll-mt-32 py-24">
+        <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
             The Idea
@@ -68,7 +70,90 @@ export default function Features() {
             </motion.div>
           ))}
         </motion.div>
-      </div>
-    </section>
+        </div>
+      </section>
+
+      <section id="midi" className="scroll-mt-32 py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.article
+            variants={item}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            className="glass-panel p-6 md:p-10"
+          >
+            <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-8 lg:gap-10 items-center">
+              <div>
+                <h3 className="text-2xl md:text-3xl font-semibold text-white mb-4">MIDI</h3>
+                <p className="text-white/60 text-sm md:text-base leading-relaxed">
+                  Upload a MIDI melody and MelodyClaim turns the note data into interval patterns. The system compares those patterns against known songs with the same matching pipeline, helping reveal structural similarity without depending on key, instrument, or production style.
+                </p>
+              </div>
+              <Link
+                to="/midi"
+                className="block rounded-[28px] border border-white/10 bg-black/35 p-5 md:p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#9d4edd]/40 hover:bg-white/[0.07]"
+                aria-label="Open MIDI upload"
+              >
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#9d4edd]/15">
+                  <Music2 size={32} className="text-[#9d4edd]" />
+                </div>
+                <h4 className="mb-3 text-2xl md:text-3xl font-bold text-white">Upload MIDI</h4>
+                <p className="mx-auto mb-7 max-w-md text-sm md:text-base leading-relaxed text-white/60">
+                  Upload your MIDI sequence. We will extract its structural progression and analyze it against our database.
+                </p>
+                <div className="rounded-2xl border-2 border-dashed border-white/20 bg-white/5 p-7 transition-colors duration-300 hover:border-[#9d4edd]/50 hover:bg-[#9d4edd]/5">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#9d4edd]/20">
+                    <Keyboard size={26} className="text-[#9d4edd]" />
+                  </div>
+                  <p className="text-lg font-semibold text-[#9d4edd]">Browse files or drag & drop</p>
+                  <p className="mt-1 text-sm text-white/50">Supports .mid and .midi</p>
+                </div>
+              </Link>
+            </div>
+          </motion.article>
+        </div>
+      </section>
+
+      <section id="humming" className="scroll-mt-32 py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.article
+            variants={item}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            className="glass-panel p-6 md:p-10"
+          >
+            <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-10 items-center">
+              <Link
+                to="/humming"
+                className="block rounded-[28px] border border-white/10 bg-black/35 p-5 md:p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#9d4edd]/40 hover:bg-white/[0.07]"
+                aria-label="Open humming input"
+              >
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#9d4edd]/15">
+                  <Mic size={32} className="text-[#9d4edd]" />
+                </div>
+                <h4 className="mb-3 text-2xl md:text-3xl font-bold text-white">Hum Your Melody</h4>
+                <p className="mx-auto mb-7 max-w-md text-sm md:text-base leading-relaxed text-white/60">
+                  Click to start humming your melody. We will search by audio first, then compare the extracted melody against the local corpus.
+                </p>
+                <div className="rounded-2xl border-2 border-dashed border-[#9d4edd]/50 bg-white/5 p-7 transition-colors duration-300 hover:bg-[#9d4edd]/5">
+                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[#9d4edd]/20">
+                    <Mic size={28} className="text-[#9d4edd]" />
+                  </div>
+                  <p className="text-lg font-semibold text-[#9d4edd]">Click to Start Humming</p>
+                  <p className="mt-1 text-sm text-white/50">Hum 8-16 seconds of the hook</p>
+                </div>
+              </Link>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-semibold text-white mb-4">Humming</h3>
+                <p className="text-white/60 text-sm md:text-base leading-relaxed">
+                  Hum or sing a short melody through the microphone when you do not have a MIDI file. MelodyClaim extracts the pitch contour, converts it into a MIDI-like interval sequence, then sends it through the same plagiarism detection flow used for uploaded melodies.
+                </p>
+              </div>
+            </div>
+          </motion.article>
+        </div>
+      </section>
+    </div>
   );
 }

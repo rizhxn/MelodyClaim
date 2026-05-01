@@ -36,25 +36,45 @@ export function parseMidi(buffer) {
       return a.midi - b.midi;
     });
 
-    // Extract MIDI note numbers, taking only the highest note for chords
+    // Extract MIDI note numbers, taking only the highest note for chords.
+    // Keep separate visual metadata so the frontend piano roll can represent
+    // timing/duration without changing the matcher input.
     const noteNumbers = [];
+    const visualNotes = [];
     let lastTick = -1;
 
     for (const note of sortedNotes) {
       if (note.ticks === lastTick) {
         // For simultaneous notes (chords), replace with the highest pitch
-        noteNumbers[noteNumbers.length - 1] = Math.max(
-          noteNumbers[noteNumbers.length - 1],
-          note.midi
-        );
+        const currentIndex = noteNumbers.length - 1;
+        if (note.midi > noteNumbers[currentIndex]) {
+          noteNumbers[currentIndex] = note.midi;
+          visualNotes[currentIndex] = {
+            midi: note.midi,
+            time: note.time || 0,
+            duration: note.duration || 0,
+            ticks: note.ticks || 0,
+            durationTicks: note.durationTicks || 0,
+            velocity: note.velocity ?? 0.75,
+          };
+        }
       } else {
         noteNumbers.push(note.midi);
+        visualNotes.push({
+          midi: note.midi,
+          time: note.time || 0,
+          duration: note.duration || 0,
+          ticks: note.ticks || 0,
+          durationTicks: note.durationTicks || 0,
+          velocity: note.velocity ?? 0.75,
+        });
         lastTick = note.ticks;
       }
     }
 
     validTracks.push({
       notes: noteNumbers,
+      visualNotes,
       trackName: track.name || `Track ${i}`,
       trackIndex: i,
     });

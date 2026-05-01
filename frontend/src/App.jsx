@@ -1,10 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import ProcessingState from './components/ProcessingState';
 import VerdictCard from './components/VerdictCard';
 import PianoRoll from './components/PianoRoll';
 import IntervalEvidence from './components/IntervalEvidence';
-import HowItWorks from './components/HowItWorks';
 import { Navbar } from './components/ui/mini-navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -13,6 +12,7 @@ import HummingPage from './pages/HummingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import { AuthCallback } from './pages/AuthCallback.jsx';
+import ReportPage from './pages/ReportPage';
 import { WebGLShader } from './components/ui/web-gl-shader';
 
 // App states
@@ -22,14 +22,10 @@ const STATE = {
   RESULTS: 'results',
 };
 
-// Minimum display time for processing state (ms)
-const MIN_PROCESSING_TIME = 2500;
-
 export default function App() {
   const [appState, setAppState] = useState(STATE.UPLOAD);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const processingStartRef = useRef(null);
 
   const handleFileAccepted = useCallback(async (file) => {
     setAppState(STATE.PROCESSING);
@@ -71,11 +67,11 @@ export default function App() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const hideNavbar = location.pathname === '/midi' || location.pathname === '/humming';
+  const hideNavbar = location.pathname === '/midi' || location.pathname === '/humming' || location.pathname === '/report';
 
   // Listen for redirected state from HummingPage's "Full Analysis" Dynamic Island button
   useEffect(() => {
-    if (location.state && location.state.result && appState === STATE.UPLOAD) {
+    if (location.pathname === '/midi' && location.state?.result && appState === STATE.UPLOAD) {
       setResult(location.state.result);
       setAppState(STATE.RESULTS);
       // Clear the state so refreshing doesn't lock it
@@ -84,10 +80,13 @@ export default function App() {
   }, [location.state, appState, navigate, location.pathname]);
 
   return (
-    <div className="bg-[#0A0A0A] min-h-screen text-white font-sans overflow-x-hidden selection:bg-[#9d4edd]/30 flex flex-col">
+    <div className="relative bg-[#0A0A0A] min-h-screen text-white font-sans overflow-x-hidden selection:bg-[#9d4edd]/30 flex flex-col">
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <WebGLShader />
+      </div>
       {!hideNavbar && <Navbar />}
 
-      <main className="relative flex-1 flex flex-col">
+      <main className="relative z-10 flex-1 flex flex-col">
         {/* Upload State / Landing Page with Routing */}
         {appState === STATE.UPLOAD && (
           <Routes>
@@ -102,6 +101,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/report" element={<ReportPage />} />
           </Routes>
         )}
 
@@ -114,33 +114,38 @@ export default function App() {
         {/* Results State */}
         {appState === STATE.RESULTS && result && (
           <div className="relative min-h-screen">
-            <div className="fixed inset-0 z-0">
-              <WebGLShader />
-            </div>
             <div className="relative z-10 max-w-7xl mx-auto px-6 py-32">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6 pt-10">
                 <h2 className="text-4xl font-bold tracking-tight">Analysis <span className="glow-text">Results</span></h2>
-                <button
-                  id="reset-button"
-                  className="group relative px-6 py-3 glass-panel hover:bg-white/10 transition-all duration-300 overflow-hidden flex items-center justify-center"
-                  onClick={handleReset}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#9d4edd]/20 to-[#ff6d00]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <span className="text-white relative z-10 font-medium tracking-wide">← Analyze Another</span>
-                </button>
+                  <button
+                    id="reset-button"
+                    className="group relative px-6 py-3 glass-panel hover:bg-white/10 transition-all duration-300 overflow-hidden flex items-center justify-center"
+                    onClick={handleReset}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#9d4edd]/20 to-[#ff6d00]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span className="text-white relative z-10 font-medium tracking-wide">← Analyze Another</span>
+                  </button>
               </div>
 
               <div className="grid gap-8">
                 <div className="glass-panel p-2">
-                  <VerdictCard result={result} />
+                  <VerdictCard 
+                    result={result} 
+                    onDownloadReport={() => {
+                      setAppState(STATE.UPLOAD);
+                      navigate('/report', { state: { result } });
+                    }} 
+                  />
                 </div>
 
               {result.primaryMatch && (
                 <>
                   <div className="glass-panel p-6 border-white/10 mt-4">
                     <PianoRoll
-                      queryNotes={result.primaryMatch.queryNotes || []}
+                      queryNotes={result.primaryMatch.queryNotes || result.simulationData?.queryPianoRollNotes || []}
                       referenceNotes={result.primaryMatch.referenceNotes || []}
+                      queryVisualNotes={result.primaryMatch.queryVisualNotes || result.simulationData?.queryVisualNotes || []}
+                      referenceVisualNotes={result.primaryMatch.referenceVisualNotes || []}
                       matchStart={result.primaryMatch.queryStart}
                       matchEnd={result.primaryMatch.queryEnd}
                       referenceStart={result.primaryMatch.referenceStart}
