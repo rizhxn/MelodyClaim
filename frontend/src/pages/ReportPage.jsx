@@ -32,6 +32,7 @@ export default function ReportPage() {
   const verdictMap = {
     'STRUCTURAL_MATCH': 'STRUCTURAL_MATCH',
     'MINOR_OVERLAP': 'MINOR_OVERLAP',
+    'METADATA_MATCH': 'METADATA_MATCH',
     'NO_MATCH': 'NO_MATCH'
   };
 
@@ -51,6 +52,7 @@ export default function ReportPage() {
       referenceStart: result.primaryMatch.referenceStart,
       referenceEnd: result.primaryMatch.referenceEnd,
       significance: result.summary,
+      matchBasis: result.primaryMatch.matchBasis,
       isRepeating: false // Default since backend doesn't explicitly flag this currently
     };
   }

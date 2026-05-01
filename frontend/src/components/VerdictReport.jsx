@@ -14,6 +14,11 @@ function VerdictBadge({ verdict }) {
       icon: '◐',
       label: 'Minor Overlap'
     },
+    METADATA_MATCH: {
+      color: 'border-[#60a5fa] bg-[#60a5fa]/10 text-[#60a5fa]',
+      icon: 'i',
+      label: 'Reference Identified'
+    },
     NO_MATCH: {
       color: 'border-[#5DCAA5] bg-[#5DCAA5]/10 text-[#5DCAA5]',
       icon: '✓',
@@ -35,6 +40,7 @@ function VerdictBadge({ verdict }) {
 }
 
 export function VerdictReport({ verdict, primaryMatch, meta, queryIntervals }) {
+  const isMetadataMatch = verdict === 'METADATA_MATCH';
   const timestamp = meta.analysedAt || new Date().toISOString();
   const formattedDate = new Date(timestamp).toLocaleDateString('en-US', { 
     year: 'numeric', 
@@ -55,6 +61,7 @@ export function VerdictReport({ verdict, primaryMatch, meta, queryIntervals }) {
         px-8 py-6 border-b border-[#30363d]
         ${verdict === 'STRUCTURAL_MATCH' ? 'bg-gradient-to-r from-[#ef4444]/10 to-transparent' : ''}
         ${verdict === 'MINOR_OVERLAP' ? 'bg-gradient-to-r from-[#f59e0b]/10 to-transparent' : ''}
+        ${verdict === 'METADATA_MATCH' ? 'bg-gradient-to-r from-[#60a5fa]/10 to-transparent' : ''}
         ${verdict === 'NO_MATCH' ? 'bg-gradient-to-r from-[#5DCAA5]/10 to-transparent' : ''}
       `}>
         <div className="flex items-start justify-between">
@@ -104,6 +111,8 @@ export function VerdictReport({ verdict, primaryMatch, meta, queryIntervals }) {
                 <p className="text-[#e6edf3] text-base leading-relaxed">
                   {verdict === 'STRUCTURAL_MATCH' 
                     ? `A significant structural match has been detected against "${primaryMatch?.songName}" by ${primaryMatch?.artist}.`
+                    : verdict === 'METADATA_MATCH'
+                    ? `The uploaded MIDI title or track metadata identifies "${primaryMatch?.songName}" by ${primaryMatch?.artist}, but no qualifying structural interval overlap was detected.`
                     : `A minor melodic overlap has been detected with "${primaryMatch?.songName}" by ${primaryMatch?.artist}.`
                   }
                 </p>
@@ -112,19 +121,19 @@ export function VerdictReport({ verdict, primaryMatch, meta, queryIntervals }) {
                   <div>
                     <div className="text-xs text-[#7d8590] mb-1">Match Length</div>
                     <div className="text-xl font-semibold text-[#e6edf3]">
-                      {primaryMatch?.matchLength} intervals
+                      {verdict === 'METADATA_MATCH' ? 'Title metadata' : `${primaryMatch?.matchLength} intervals`}
                     </div>
                   </div>
                   <div>
                     <div className="text-xs text-[#7d8590] mb-1">Classification</div>
                     <div className="text-xl font-semibold text-[#e6edf3]">
-                      {primaryMatch?.classification}
+                      {verdict === 'METADATA_MATCH' ? 'Identified' : primaryMatch?.classification}
                     </div>
                   </div>
                   <div>
                     <div className="text-xs text-[#7d8590] mb-1">Pattern Type</div>
                     <div className="text-xl font-semibold text-[#e6edf3]">
-                      {primaryMatch?.isRepeating ? 'Recurring' : 'Single'}
+                      {verdict === 'METADATA_MATCH' ? 'Metadata' : primaryMatch?.isRepeating ? 'Recurring' : 'Single'}
                     </div>
                   </div>
                 </div>
@@ -154,15 +163,15 @@ export function VerdictReport({ verdict, primaryMatch, meta, queryIntervals }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#30363d]">
+                <div className={isMetadataMatch ? 'hidden' : 'grid grid-cols-2 gap-4 pt-4 border-t border-[#30363d]'}>
                   <div>
-                    <div className="text-xs text-[#7d8590] mb-2">Match Position in Your Melody</div>
+                    <div className="text-xs text-[#7d8590] mb-2">{isMetadataMatch ? 'Identification Source' : 'Match Position in Your Melody'}</div>
                     <div className="font-mono text-sm text-[#e6edf3]">
                       Intervals {primaryMatch.queryStart}–{primaryMatch.queryEnd}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-[#7d8590] mb-2">Match Position in Reference</div>
+                    <div className="text-xs text-[#7d8590] mb-2">{isMetadataMatch ? 'Interval Scan' : 'Match Position in Reference'}</div>
                     <div className="font-mono text-sm text-[#e6edf3]">
                       Intervals {primaryMatch.referenceStart}–{primaryMatch.referenceEnd}
                     </div>
@@ -172,7 +181,7 @@ export function VerdictReport({ verdict, primaryMatch, meta, queryIntervals }) {
             </section>
 
             {/* Matched Interval Sequence */}
-            <section>
+            <section className={isMetadataMatch ? 'hidden' : ''}>
               <h2 className="text-lg font-semibold text-[#e6edf3] mb-4 flex items-center gap-2">
                 <span className="w-1 h-5 bg-[#5DCAA5] rounded-full"></span>
                 Matched Interval Sequence

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { usePitchDetection } from '../hooks/usePitchDetection'
 import { Mic } from 'lucide-react'
 
-const MAX_RECORDING_MS = 12000
+const MAX_RECORDING_MS = 16000
 const MIN_NOTES = 8
 
 export function HummingInput({ onComplete }) {
@@ -31,7 +31,7 @@ export function HummingInput({ onComplete }) {
     const { notes, audioBlob } = await stopRecording()
     
     if (notes.length < MIN_NOTES) {
-      setError(`Only ${notes.length} notes detected. Hum a clearer melody for 8-12 seconds.`)
+      setError(`Only ${notes.length} notes detected. Hum a clearer melody for 8-16 seconds.`)
       return
     }
 
@@ -77,7 +77,7 @@ export function HummingInput({ onComplete }) {
                 Click to Start Humming
               </div>
               <div className="text-white/50 text-sm mt-1">
-                Hum 8-12 seconds of the hook
+                Hum 8-16 seconds of the hook
               </div>
             </div>
           </div>

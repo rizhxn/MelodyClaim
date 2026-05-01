@@ -28,12 +28,51 @@ export function generateVerdict(filteredMatches) {
     };
   }
 
+  const primaryMatch = filteredMatches[0];
+
+  if (primaryMatch.matchBasis === 'TITLE_METADATA' || primaryMatch.severity === 'METADATA') {
+    return {
+      verdict: 'METADATA_MATCH',
+      primaryMatch: {
+        songName: primaryMatch.songName,
+        artist: primaryMatch.artist,
+        matchedIntervalSequence: [],
+        queryStart: null,
+        queryEnd: null,
+        referenceStart: null,
+        referenceEnd: null,
+        matchLength: 0,
+        trackIndex: primaryMatch.trackIndex || 0,
+        severity: 'METADATA',
+        score: 0,
+        densityMultiplier: 1,
+        referenceNotes: primaryMatch.referenceNotes,
+        referenceIntervals: primaryMatch.referenceIntervals,
+        matchBasis: 'TITLE_METADATA',
+      },
+      allMatches: [{
+        songName: primaryMatch.songName,
+        artist: primaryMatch.artist,
+        matchLength: 0,
+        severity: 'METADATA',
+        trackIndex: primaryMatch.trackIndex || 0,
+        queryStart: null,
+        queryEnd: null,
+        referenceStart: null,
+        referenceEnd: null,
+        score: 0,
+        matchBasis: 'TITLE_METADATA',
+      }],
+      summary: `Uploaded MIDI title or track metadata identifies "${primaryMatch.songName}" by ${primaryMatch.artist}. ` +
+        'No qualifying structural interval overlap was detected against the reference fingerprint.',
+    };
+  }
+
   const hasStructural = filteredMatches.some(m => m.severity === 'STRUCTURAL' || m.score >= 12);
   const verdict = hasStructural ? 'STRUCTURAL_MATCH' : 'MINOR_OVERLAP';
 
   // The primary match is the one with the highest score
-  const primaryMatch = filteredMatches[0];
-  
+
   // Upgrade the UI severity flag if the multiplier pushed it to structural
   if (primaryMatch && primaryMatch.score >= 12 && primaryMatch.severity === 'MINOR') {
     primaryMatch.severity = 'STRUCTURAL';
@@ -63,6 +102,7 @@ export function generateVerdict(filteredMatches) {
       densityMultiplier: primaryMatch.densityMultiplier,
       referenceNotes: primaryMatch.referenceNotes,
       referenceIntervals: primaryMatch.referenceIntervals,
+      matchBasis: primaryMatch.matchBasis,
     },
     allMatches: filteredMatches.map(m => ({
       songName: m.songName,
@@ -75,6 +115,7 @@ export function generateVerdict(filteredMatches) {
       referenceStart: m.referenceStart,
       referenceEnd: m.referenceEnd,
       score: m.score,
+      matchBasis: m.matchBasis,
     })),
     summary,
   };

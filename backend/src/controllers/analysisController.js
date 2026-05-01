@@ -26,6 +26,59 @@ function midiToNoteName(midiNumber) {
   return `${noteName}${octave}`;
 }
 
+function normalizeTitle(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\.(mid|midi)$/i, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function hasTitleMatch(candidate, songName) {
+  const normalizedCandidate = normalizeTitle(candidate);
+  const normalizedSong = normalizeTitle(songName);
+
+  if (!normalizedCandidate || !normalizedSong || normalizedSong.length < 4) {
+    return false;
+  }
+
+  return normalizedCandidate === normalizedSong ||
+    normalizedCandidate.includes(normalizedSong);
+}
+
+function findMetadataMatch(fileName, tracks, corpus) {
+  const candidates = [
+    fileName,
+    ...tracks.map(track => track.trackName),
+  ].filter(Boolean);
+
+  for (const corpusEntry of corpus) {
+    if (candidates.some(candidate => hasTitleMatch(candidate, corpusEntry.songName))) {
+      return {
+        patternIndex: corpus.indexOf(corpusEntry),
+        songName: corpusEntry.songName,
+        artist: corpusEntry.artist,
+        matchLength: 0,
+        severity: 'METADATA',
+        trackIndex: tracks[0]?.trackIndex || 0,
+        queryStart: null,
+        queryEnd: null,
+        matchedIntervalSequence: [],
+        referenceStart: null,
+        referenceEnd: null,
+        referenceNotes: corpusEntry.notes || [],
+        referenceIntervals: corpusEntry.intervals,
+        densityMultiplier: 1,
+        score: 0,
+        matchBasis: 'TITLE_METADATA',
+      };
+    }
+  }
+
+  return null;
+}
+
 /**
  * POST /api/analyse
  * Accepts multipart MIDI file upload.
@@ -83,9 +136,12 @@ export async function analyseHandler(req, res) {
 
     // Step 5: Filter
     const filteredMatches = filterMatches(allRawMatches, corpus);
+    const metadataMatch = filteredMatches.length === 0
+      ? findMetadataMatch(req.file.originalname, tracks, corpus)
+      : null;
 
     // Step 6: Verdict
-    const result = generateVerdict(filteredMatches);
+    const result = generateVerdict(metadataMatch ? [metadataMatch] : filteredMatches);
     const matchedTrack = result.primaryMatch
       ? tracks.find(track => track.trackIndex === result.primaryMatch.trackIndex) || primaryTrack
       : primaryTrack;
@@ -123,6 +179,7 @@ export async function analyseHandler(req, res) {
             referenceIntervals: result.primaryMatch.referenceIntervals,
             severity: result.primaryMatch.severity,
             score: result.primaryMatch.score,
+            matchBasis: result.primaryMatch.matchBasis,
           }
         : null,
       allMatches: result.allMatches,

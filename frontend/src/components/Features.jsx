@@ -141,7 +141,7 @@ export default function Features() {
                     <Mic size={28} className="text-[#9d4edd]" />
                   </div>
                   <p className="text-lg font-semibold text-[#9d4edd]">Click to Start Humming</p>
-                  <p className="mt-1 text-sm text-white/50">Hum 8-12 seconds of the hook</p>
+                  <p className="mt-1 text-sm text-white/50">Hum 8-16 seconds of the hook</p>
                 </div>
               </Link>
               <div>
