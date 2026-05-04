@@ -1,4 +1,4 @@
-# MelodyClaim ♪
+# MelodyClaim 
 
 MelodyClaim is a structural plagiarism detection engine for melodies. Instead of relying on subjective listening or error-prone audio waveform analysis, MelodyClaim strips sound down to its mathematical structure: **interval patterns**. 
 
