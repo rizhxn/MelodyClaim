@@ -1,8 +1,25 @@
-Before committing, enforce strict environment validation:
+Update the backend deployment setup to ensure better-sqlite3 builds correctly on a Linux environment like Render.
 
-1. Remove any fallback values for FRONTEND_URL in backend.
-2. Ensure server throws an error if FRONTEND_URL is undefined.
-3. Keep VITE_BACKEND_URL required on frontend (no silent fallback).
-4. Do not introduce any new logic beyond validation.
+Make ONLY the following changes:
 
-Goal: prevent silent misconfiguration in production.
+1. In backend/package.json:
+
+   * Modify the install process so better-sqlite3 is built from source.
+
+2. Replace the existing "postinstall" script with:
+   "postinstall": "npm rebuild better-sqlite3 --build-from-source"
+
+3. Additionally, ensure the Node version is explicitly defined by adding:
+   "engines": {
+   "node": "18.x"
+   }
+
+4. Do NOT modify any application logic, routes, controllers, or database code.
+
+5. Output:
+
+   * Updated package.json scripts and engines section
+   * Confirmation that no other files were changed
+
+Goal:
+Ensure better-sqlite3 compiles successfully on Render and eliminate ERR_DLOPEN_FAILED errors.
