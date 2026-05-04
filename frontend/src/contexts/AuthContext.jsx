@@ -17,7 +17,10 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const res = await fetch('/api/auth/me', {
+        const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+        if (!API_BASE_URL) throw new Error('VITE_BACKEND_URL is not defined.');
+        
+        const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: { 'Authorization': `Bearer ${storedToken}` }
         });
 
@@ -42,7 +45,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const res = await fetch('/api/auth/login', {
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    if (!API_BASE_URL) throw new Error('VITE_BACKEND_URL is not defined.');
+    
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -60,7 +66,10 @@ export function AuthProvider({ children }) {
   };
 
   const signup = async (email, password, displayName) => {
-    const res = await fetch('/api/auth/signup', {
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    if (!API_BASE_URL) throw new Error('VITE_BACKEND_URL is not defined.');
+    
+    const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name: displayName })
@@ -84,11 +93,15 @@ export function AuthProvider({ children }) {
   };
 
   const loginWithGoogle = () => {
-    window.location.href = '/api/auth/google';
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    if (!API_BASE_URL) throw new Error('VITE_BACKEND_URL is not defined.');
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
   };
 
   const loginWithGitHub = () => {
-    window.location.href = '/api/auth/github';
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    if (!API_BASE_URL) throw new Error('VITE_BACKEND_URL is not defined.');
+    window.location.href = `${API_BASE_URL}/api/auth/github`;
   };
 
   return (

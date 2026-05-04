@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Music } from 'lucide-react';
+import { Music, Keyboard } from 'lucide-react';
 
 export default function UploadZone({ onFileAccepted }) {
   const [dragOver, setDragOver] = useState(false);
@@ -83,8 +83,8 @@ export default function UploadZone({ onFileAccepted }) {
         aria-label="Upload MIDI file"
       >
         <div className="flex flex-col items-center justify-center text-center space-y-3">
-          <div className="w-12 h-12 rounded-full bg-[#9d4edd]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-             <span className="text-2xl" role="img" aria-label="upload">🎹</span>
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#9d4edd]/20 group-hover:scale-110 transition-transform">
+            <Keyboard size={26} className="text-[#9d4edd]" />
           </div>
           <div>
             <div className="text-[#9d4edd] font-semibold text-lg">
