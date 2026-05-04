@@ -35,7 +35,10 @@ export default function App() {
       const formData = new FormData();
       formData.append('midi', file);
 
-      const response = await fetch('/api/analyse', {
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+      if (!API_BASE_URL) throw new Error('VITE_BACKEND_URL is not defined in the environment.');
+      
+      const response = await fetch(`${API_BASE_URL}/api/analyse`, {
         method: 'POST',
         body: formData,
       });

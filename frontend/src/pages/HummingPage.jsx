@@ -43,7 +43,10 @@ export default function HummingPage() {
     const formData = new FormData();
     formData.append('audio', audioBlob, 'humming.webm');
 
-    const response = await fetch('/api/recognize/humming', {
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    if (!API_BASE_URL) throw new Error('VITE_BACKEND_URL is not defined in the environment.');
+    
+    const response = await fetch(`${API_BASE_URL}/api/recognize/humming`, {
       method: 'POST',
       body: formData,
     });
@@ -60,7 +63,10 @@ export default function HummingPage() {
   };
 
   const analyzeWithLocalMatcher = async (notes) => {
-    const response = await fetch('/api/analyse/notes', {
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    if (!API_BASE_URL) throw new Error('VITE_BACKEND_URL is not defined in the environment.');
+    
+    const response = await fetch(`${API_BASE_URL}/api/analyse/notes`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

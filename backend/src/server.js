@@ -15,8 +15,16 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+if (!process.env.FRONTEND_URL) {
+  console.error("FATAL ERROR: FRONTEND_URL environment variable is not defined.");
+  process.exit(1);
+}
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL, 
+  credentials: true
+}));
 app.use(express.json());
 app.use(passport.initialize());
 
@@ -39,18 +47,6 @@ initializeAutomaton();
 // API routes
 app.use('/api', apiRoutes);
 app.use('/api/auth', authRoutes);
-
-// Serve Frontend in Production
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the React frontend build
-  const frontendBuildPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
-  app.use(express.static(frontendBuildPath));
-
-  // Catch-all route to serve index.html for React Router
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
-  });
-}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
