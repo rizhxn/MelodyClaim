@@ -40,6 +40,18 @@ initializeAutomaton();
 app.use('/api', apiRoutes);
 app.use('/api/auth', authRoutes);
 
+// Serve Frontend in Production
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React frontend build
+  const frontendBuildPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
+  app.use(express.static(frontendBuildPath));
+
+  // Catch-all route to serve index.html for React Router
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+}
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
@@ -56,7 +68,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n🎵 MelodyClaim Backend running on http://localhost:${PORT}`);
+  console.log(`\n MelodyClaim Backend running on port ${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/api/health`);
   console.log(`   Corpus:       http://localhost:${PORT}/api/corpus\n`);
 });
