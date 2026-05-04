@@ -37,8 +37,8 @@ export default function Features() {
 
   return (
     <div className="relative z-10 pb-24">
-      <section id="about" className="scroll-mt-32 py-24">
-        <div className="max-w-7xl mx-auto px-6">
+      <section id="about" className="min-h-screen flex flex-col justify-center relative">
+        <div className="max-w-7xl mx-auto px-6 w-full">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
             The Idea
@@ -73,8 +73,8 @@ export default function Features() {
         </div>
       </section>
 
-      <section id="midi" className="scroll-mt-32 py-24">
-        <div className="max-w-6xl mx-auto px-6">
+      <section id="midi" className="min-h-screen flex flex-col justify-center relative">
+        <div className="max-w-6xl mx-auto px-6 w-full">
           <motion.article
             variants={item}
             initial="hidden"
@@ -114,8 +114,8 @@ export default function Features() {
         </div>
       </section>
 
-      <section id="humming" className="scroll-mt-32 py-24">
-        <div className="max-w-6xl mx-auto px-6">
+      <section id="humming" className="min-h-screen flex flex-col justify-center relative">
+        <div className="max-w-6xl mx-auto px-6 w-full">
           <motion.article
             variants={item}
             initial="hidden"
