@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "seed": "node src/database/seed.js",
-    "corpus:check": "node src/database/seed.js --check"
+    "corpus:check": "node src/database/seed.js --check",
+    "postinstall": "npm rebuild better-sqlite3"
   },
   "dependencies": {
     "@tonejs/midi": "^2.0.28",
