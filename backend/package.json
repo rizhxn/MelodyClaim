@@ -1,0 +1,35 @@
+{
+  "name": "melodyclaim-backend",
+  "version": "1.0.0",
+  "description": "MelodyClaim - Music Plagiarism Detection Backend",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/database/seed.js",
+    "corpus:check": "node src/database/seed.js --check",
+    "postinstall": "npm rebuild better-sqlite3 --build-from-source"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "@tonejs/midi": "^2.0.28",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^11.10.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.1",
+    "form-data": "^4.0.6",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
+    "passport-google-oauth20": "^2.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

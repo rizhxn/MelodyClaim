@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --color-midnight: #0A0A0A;
+  --color-purple-accent: #9d4edd;
+  --color-orange-accent: #ff6d00;
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+  --color-glass-bg: rgba(255, 255, 255, 0.03);
+}
+
+@layer base {
+  body {
+    @apply bg-midnight text-white min-h-screen overflow-x-hidden font-sans;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(157, 78, 221, 0.15), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(255, 109, 0, 0.1), transparent 25%);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/[0.03] backdrop-blur-[30px] border border-white/10 rounded-2xl shadow-2xl;
+  }
+  
+  .glow-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-accent to-orange-accent;
+  }
+
+  .glow-button {
+    @apply relative overflow-hidden rounded-xl transition-all duration-300;
+  }
+  
+  .glow-button::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-purple-accent to-orange-accent opacity-0 transition-opacity duration-300;
+    z-index: -1;
+  }
+  
+  .glow-button:hover::before {
+    @apply opacity-100;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0d1117;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  /* Hide non-essential elements when printing */
+  nav, footer, button {
+    display: none !important;
+  }
+
+  /* Ensure verdict report prints cleanly */
+  .verdict-report {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Force light colors for readability */
+  * {
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Keep semantic colors */
+  .text-red-500, .border-red-500, .bg-red-500, .text-\[\#ef4444\], .border-\[\#ef4444\] {
+    color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+  }
+
+  .text-green-500, .border-green-500, .bg-green-500, .text-\[\#5DCAA5\], .border-\[\#5DCAA5\] {
+    color: #5DCAA5 !important;
+    border-color: #5DCAA5 !important;
+    background-color: rgba(93, 202, 165, 0.1) !important;
+  }
+}
